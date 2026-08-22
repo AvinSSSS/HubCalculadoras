@@ -1,5 +1,5 @@
 {
-  "name": "portifolio",
+  "name": "hub-calculadoras",
   "version": "0.0.1",
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
@@ -64,5 +64,5 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.8.0"
   },
-  "description": "An Ionic project"
+  "description": "Hub responsivo de calculadoras úteis em Ionic e Angular"
 }

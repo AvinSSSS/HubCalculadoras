@@ -5,7 +5,7 @@ export type Language = 'pt' | 'en';
 
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
-  private readonly storageKey = 'andreus-portfolio-language';
+  private readonly storageKey = 'hub-calculadoras-language';
   readonly current = signal<Language>(this.readInitialLanguage());
 
   constructor(@Inject(DOCUMENT) private readonly document: Document) {

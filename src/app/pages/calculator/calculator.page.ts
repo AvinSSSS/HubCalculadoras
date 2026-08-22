@@ -1,12 +1,11 @@
 import { Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { IonContent } from '@ionic/angular/standalone';
 import { LanguageService } from '../../core/language.service';
 
 type CalculatorTab = 'hourly' | 'interest' | 'travel';
 
-@Component({ selector: 'app-calculator', templateUrl: './calculator.page.html', styleUrls: ['./calculator.page.scss'], standalone: true, imports: [IonContent, FormsModule, RouterLink] })
+@Component({ selector: 'app-calculator', templateUrl: './calculator.page.html', styleUrls: ['./calculator.page.scss'], standalone: true, imports: [IonContent, FormsModule] })
 export class CalculatorPage {
   readonly activeTab = signal<CalculatorTab>('hourly');
   desiredIncome = 8000; monthlyCosts = 1200; monthlyHours = 120; profitMargin = 20;

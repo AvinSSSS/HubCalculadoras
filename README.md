@@ -5,7 +5,7 @@
 
 Web app responsivo e sem anúncios para resolver cálculos recorrentes com rapidez e transparência.
 
-🌐 **Demonstração:** [avinssss.github.io/HubCalculadoras/calculadoras](https://avinssss.github.io/HubCalculadoras/calculadoras)
+🌐 **Demonstração:** [avinssss.github.io/HubCalculadoras](https://avinssss.github.io/HubCalculadoras/)
 
 ## ✨ Calculadoras incluídas
 
