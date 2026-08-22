@@ -1,0 +1,50 @@
+<ion-content>
+  <header><a routerLink="/" class="back">← {{ isPt() ? 'Portfólio' : 'Portfolio' }}</a><button type="button" (click)="language.toggle()">{{ isPt() ? 'EN' : 'PT' }}</button></header>
+  <main>
+    <p class="eyebrow">{{ isPt() ? 'FERRAMENTAS SEM ANÚNCIOS' : 'AD-FREE TOOLS' }}</p>
+    <h1>{{ isPt() ? 'Hub de' : 'Useful' }} <em>{{ isPt() ? 'Calculadoras' : 'Calculators' }}</em></h1>
+    <p class="lead">{{ isPt() ? 'Resultados instantâneos. Seus dados ficam somente neste dispositivo.' : 'Instant results. Your data stays on this device.' }}</p>
+    <nav aria-label="Calculadoras">
+      <button [class.active]="activeTab() === 'hourly'" (click)="select('hourly')">{{ isPt() ? 'Valor-hora' : 'Hourly rate' }}</button>
+      <button [class.active]="activeTab() === 'interest'" (click)="select('interest')">{{ isPt() ? 'Juros compostos' : 'Compound interest' }}</button>
+      <button [class.active]="activeTab() === 'travel'" (click)="select('travel')">{{ isPt() ? 'Deslocamento' : 'Commuting' }}</button>
+    </nav>
+
+    @if (activeTab() === 'hourly') {
+      <section class="calculator">
+        <div class="fields">
+          <label>{{ isPt() ? 'Renda mensal desejada' : 'Desired monthly income' }}<input type="number" min="0" [(ngModel)]="desiredIncome"></label>
+          <label>{{ isPt() ? 'Custos mensais do negócio' : 'Monthly business costs' }}<input type="number" min="0" [(ngModel)]="monthlyCosts"></label>
+          <label>{{ isPt() ? 'Horas faturáveis por mês' : 'Billable hours per month' }}<input type="number" min="1" [(ngModel)]="monthlyHours"></label>
+          <label>{{ isPt() ? 'Margem para reserva e lucro (%)' : 'Profit and reserve margin (%)' }}<input type="number" min="0" max="95" [(ngModel)]="profitMargin"></label>
+        </div>
+        <aside><span>{{ isPt() ? 'VALOR-HORA SUGERIDO' : 'SUGGESTED HOURLY RATE' }}</span><strong>{{ money(hourlyRate()) }}</strong><p>{{ isPt() ? 'Cobre a renda, os custos e a margem informada.' : 'Covers income, costs and the selected margin.' }}</p></aside>
+      </section>
+    }
+    @if (activeTab() === 'interest') {
+      <section class="calculator">
+        <div class="fields">
+          <label>{{ isPt() ? 'Valor inicial' : 'Initial amount' }}<input type="number" min="0" [(ngModel)]="initialAmount"></label>
+          <label>{{ isPt() ? 'Aporte mensal' : 'Monthly deposit' }}<input type="number" min="0" [(ngModel)]="monthlyDeposit"></label>
+          <label>{{ isPt() ? 'Taxa mensal (%)' : 'Monthly rate (%)' }}<input type="number" min="0" step="0.01" [(ngModel)]="monthlyRate"></label>
+          <label>{{ isPt() ? 'Prazo em meses' : 'Term in months' }}<input type="number" min="0" [(ngModel)]="months"></label>
+        </div>
+        <aside><span>{{ isPt() ? 'SALDO PROJETADO' : 'PROJECTED BALANCE' }}</span><strong>{{ money(investmentTotal()) }}</strong><p>{{ isPt() ? 'Total investido:' : 'Total invested:' }} {{ money(investedAmount()) }}<br>{{ isPt() ? 'Rendimento estimado:' : 'Estimated earnings:' }} {{ money(investmentTotal() - investedAmount()) }}</p></aside>
+      </section>
+    }
+    @if (activeTab() === 'travel') {
+      <section class="calculator">
+        <div class="fields compact">
+          <label>{{ isPt() ? 'Distância diária (km)' : 'Daily distance (km)' }}<input type="number" min="0" [(ngModel)]="distance"></label>
+          <label>{{ isPt() ? 'Dias por mês' : 'Days per month' }}<input type="number" min="0" max="31" [(ngModel)]="workDays"></label>
+          <label>{{ isPt() ? 'Combustível (R$/L)' : 'Fuel (R$/L)' }}<input type="number" min="0" step="0.01" [(ngModel)]="fuelPrice"></label>
+          <label>{{ isPt() ? 'Consumo combustão (km/L)' : 'Fuel efficiency (km/L)' }}<input type="number" min="0.1" step="0.1" [(ngModel)]="fuelEfficiency"></label>
+          <label>{{ isPt() ? 'Consumo elétrico (km/kWh)' : 'EV efficiency (km/kWh)' }}<input type="number" min="0.1" step="0.1" [(ngModel)]="electricEfficiency"></label>
+          <label>{{ isPt() ? 'Energia (R$/kWh)' : 'Energy (R$/kWh)' }}<input type="number" min="0" step="0.01" [(ngModel)]="energyPrice"></label>
+        </div>
+        <aside><span>{{ isPt() ? 'CUSTO MENSAL ESTIMADO' : 'ESTIMATED MONTHLY COST' }}</span><div class="comparison"><p>{{ isPt() ? 'Combustão' : 'Fuel' }}<strong>{{ money(fuelMonthly()) }}</strong></p><p>{{ isPt() ? 'Elétrico' : 'Electric' }}<strong>{{ money(electricMonthly()) }}</strong></p></div><p>{{ isPt() ? 'Economia potencial:' : 'Potential savings:' }} {{ money(travelSavings()) }}</p></aside>
+      </section>
+    }
+    <p class="disclaimer">{{ isPt() ? 'Resultados são estimativas educacionais e não constituem aconselhamento financeiro.' : 'Results are educational estimates and do not constitute financial advice.' }}</p>
+  </main>
+</ion-content>

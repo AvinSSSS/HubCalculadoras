@@ -1,0 +1,84 @@
+<ion-content>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Andreus Vinicius — início"><span>AV</span> Andreus Vinicius</a>
+    <nav [attr.aria-label]="isPt() ? 'Navegação principal' : 'Main navigation'">
+      <a href="#sobre">{{ isPt() ? 'Sobre' : 'About' }}</a>
+      <a href="#projetos">{{ isPt() ? 'Projetos' : 'Projects' }}</a>
+      <a href="#processo">{{ isPt() ? 'Processo' : 'Process' }}</a>
+      <a href="#contato">{{ isPt() ? 'Contato' : 'Contact' }}</a>
+    </nav>
+    <button class="language" type="button" (click)="language.toggle()" [attr.aria-label]="isPt() ? 'Mudar para inglês' : 'Switch to Portuguese'">{{ isPt() ? 'EN' : 'PT' }}</button>
+  </header>
+
+  <main id="top">
+    <section class="hero section-shell">
+      <div class="hero-copy reveal">
+        <p class="eyebrow"><span></span>{{ isPt() ? 'DESENVOLVEDOR DE SOLUÇÕES ÁGEIS' : 'AGILE SOLUTIONS DEVELOPER' }}</p>
+        <h1>{{ isPt() ? 'Tecnologia prática para problemas' : 'Practical technology for' }} <em>{{ isPt() ? 'reais.' : 'real problems.' }}</em></h1>
+        <p class="hero-lead">{{ isPt() ? 'Transformo rotinas manuais em ferramentas simples, rápidas e confiáveis — do desktop à web.' : 'I turn manual routines into simple, fast and reliable tools — from desktop to web.' }}</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#projetos">{{ isPt() ? 'Ver projetos' : 'View projects' }} <span aria-hidden="true">↓</span></a>
+          <a class="button ghost" href="#contato">{{ isPt() ? 'Falar comigo' : 'Get in touch' }}</a>
+        </div>
+      </div>
+      <aside class="code-card reveal" aria-label="Resumo profissional">
+        <div class="code-card-bar"><i></i><i></i><i></i><span>solution.pas</span></div>
+        <pre><code><b>type</b>
+  TSolution = <b>record</b>
+    Problem: string;
+    Complexity: <span>'only what matters'</span>;
+    Result: <span>'time saved'</span>;
+  <b>end</b>;
+
+<b>begin</b>
+  Listen;
+  BuildFast;
+  DeliverValue;
+<b>end</b>.</code></pre>
+        <p>{{ isPt() ? 'Disponível para novos desafios' : 'Available for new challenges' }}</p>
+      </aside>
+    </section>
+
+    <section id="sobre" class="about section-shell">
+      <div><p class="section-index">01 / {{ isPt() ? 'SOBRE' : 'ABOUT' }}</p><h2>{{ isPt() ? 'Experiência que vira' : 'Experience turned into' }} <em>{{ isPt() ? 'solução.' : 'solutions.' }}</em></h2></div>
+      <div class="about-copy">
+        <p>{{ isPt() ? 'Sou desenvolvedor com anos de experiência construindo sistemas e automações. Minha especialidade é entender a dor, reduzir a complexidade e entregar uma ferramenta que funciona.' : 'I am a developer with years of experience building systems and automations. My specialty is understanding the pain, reducing complexity and delivering a tool that works.' }}</p>
+        <p>{{ isPt() ? 'Trabalho com Delphi, Ionic, Angular, Node.js e Python, escolhendo a tecnologia pelo problema — não o contrário.' : 'I work with Delphi, Ionic, Angular, Node.js and Python, choosing technology for the problem — not the other way around.' }}</p>
+        <div class="skills" aria-label="Tecnologias">@for (skill of skills; track skill) { <span>{{ skill }}</span> }</div>
+      </div>
+    </section>
+
+    <section id="projetos" class="projects section-shell">
+      <p class="section-index">02 / {{ isPt() ? 'PROJETOS' : 'PROJECTS' }}</p>
+      <div class="section-heading"><h2>{{ isPt() ? 'Ferramentas que' : 'Tools that' }} <em>{{ isPt() ? 'resolvem.' : 'solve.' }}</em></h2><p>{{ isPt() ? 'Projetos pequenos no tamanho, grandes no tempo que devolvem.' : 'Small in size, meaningful in the time they give back.' }}</p></div>
+      <div class="project-grid">
+        @for (project of projects; track project.slug) {
+          <article class="project-card" [class.featured]="project.status === 'available'">
+            <div class="project-top"><span class="project-number">{{ project.number }}</span><span class="status" [class.online]="project.status === 'available'">{{ project.status === 'available' ? (isPt() ? 'Disponível' : 'Available') : (isPt() ? 'Em construção' : 'Building') }}</span></div>
+            <h3>{{ local(project.title) }}</h3>
+            <p class="problem"><strong>{{ isPt() ? 'O problema:' : 'The problem:' }}</strong> {{ local(project.problem) }}</p>
+            <p>{{ local(project.solution) }}</p>
+            <div class="stack">@for (technology of project.stack; track technology) { <span>{{ technology }}</span> }</div>
+            @if (project.demoUrl) { <a class="project-link" routerLink="/calculadoras">{{ isPt() ? 'Abrir projeto' : 'Open project' }} <span>↗</span></a> }
+            @else { <span class="project-link muted">{{ isPt() ? 'MVP em desenvolvimento' : 'MVP in development' }}</span> }
+          </article>
+        }
+      </div>
+    </section>
+
+    <section id="processo" class="process section-shell">
+      <p class="section-index">03 / {{ isPt() ? 'PROCESSO' : 'PROCESS' }}</p>
+      <h2>{{ isPt() ? 'Do problema ao valor,' : 'From problem to value,' }} <em>{{ isPt() ? 'sem ruído.' : 'without noise.' }}</em></h2>
+      <div class="steps">@for (step of processSteps; track step.number) { <article><span>{{ step.number }}</span><h3>{{ isPt() ? step.ptTitle : step.enTitle }}</h3><p>{{ isPt() ? step.ptText : step.enText }}</p></article> }</div>
+    </section>
+
+    <section id="contato" class="contact section-shell">
+      <p class="section-index">04 / {{ isPt() ? 'CONTATO' : 'CONTACT' }}</p>
+      <h2>{{ isPt() ? 'Tem uma rotina que poderia ser' : 'Is there a routine that could be' }} <em>{{ isPt() ? 'mais simples?' : 'simpler?' }}</em></h2>
+      <p>{{ isPt() ? 'Vamos conversar sobre o problema. Sem compromisso, sem jargão.' : "Let's talk about the problem. No pressure, no jargon." }}</p>
+      <div class="contact-links"><a href="mailto:SEU_EMAIL_AQUI">E-mail <span>↗</span></a><a href="https://www.linkedin.com/" target="_blank" rel="noreferrer">LinkedIn <span>↗</span></a><a href="https://github.com/AvinSSSS" target="_blank" rel="noreferrer">GitHub <span>↗</span></a></div>
+      <small>{{ isPt() ? 'Substitua o e-mail e o LinkedIn pelos seus endereços antes da publicação.' : 'Replace email and LinkedIn with your addresses before publishing.' }}</small>
+    </section>
+  </main>
+  <footer><span>Andreus Vinicius</span><span>{{ currentYear }} · {{ isPt() ? 'Feito com Ionic + Angular' : 'Built with Ionic + Angular' }}</span></footer>
+</ion-content>
