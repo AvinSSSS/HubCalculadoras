@@ -1,14 +1,15 @@
 import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 
 export type Language = 'pt' | 'en';
 
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
+  private readonly document = inject(DOCUMENT);
   private readonly storageKey = 'hub-calculadoras-language';
   readonly current = signal<Language>(this.readInitialLanguage());
 
-  constructor(@Inject(DOCUMENT) private readonly document: Document) {
+  constructor() {
     this.document.documentElement.lang = this.current() === 'pt' ? 'pt-BR' : 'en';
   }
 

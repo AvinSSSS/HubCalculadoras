@@ -12,6 +12,10 @@ Web app responsivo e sem anúncios para resolver cálculos recorrentes com rapid
 - 💼 **Valor-hora:** considera renda desejada, custos, horas faturáveis e margem.
 - 📈 **Juros compostos:** projeta saldo, capital investido e rendimento estimado.
 - 🚗 **Deslocamento:** compara o custo mensal de veículo a combustão e elétrico.
+- 🏦 **Financiamento:** estima parcela fixa, juros totais e evolução do saldo devedor.
+- 🏷️ **Descontos:** combina descontos sucessivos e calcula o parcelamento do preço final.
+
+Cada calculadora inclui um gráfico responsivo e pode exportar seus resultados para um arquivo Excel (`.xlsx`).
 
 Todos os cálculos acontecem localmente. Nenhum valor digitado é transmitido ou armazenado.
 
@@ -20,6 +24,7 @@ Todos os cálculos acontecem localmente. Nenhum valor digitado é transmitido ou
 - Ionic 8 e Angular 20 com componentes standalone.
 - TypeScript e formulários Angular.
 - SCSS responsivo e `Intl.NumberFormat` para valores em reais.
+- SheetJS para geração local de planilhas Excel.
 - Karma/Jasmine e Chrome Headless.
 - GitHub Actions e GitHub Pages.
 

@@ -1,13 +1,16 @@
 <ion-content>
   <header><a href="https://avinssss.github.io/Portifolio/" class="back">← {{ isPt() ? 'Portfólio' : 'Portfolio' }}</a><button type="button" (click)="language.toggle()">{{ isPt() ? 'EN' : 'PT' }}</button></header>
   <main>
-    <p class="eyebrow">{{ isPt() ? 'FERRAMENTAS SEM ANÚNCIOS' : 'AD-FREE TOOLS' }}</p>
-    <h1>{{ isPt() ? 'Hub de' : 'Useful' }} <em>{{ isPt() ? 'Calculadoras' : 'Calculators' }}</em></h1>
-    <p class="lead">{{ isPt() ? 'Resultados instantâneos. Seus dados ficam somente neste dispositivo.' : 'Instant results. Your data stays on this device.' }}</p>
+    <div class="intro">
+      <div><p class="eyebrow">{{ isPt() ? 'FERRAMENTAS SEM ANÚNCIOS' : 'AD-FREE TOOLS' }}</p><h1>{{ isPt() ? 'Hub de' : 'Useful' }} <em>{{ isPt() ? 'Calculadoras' : 'Calculators' }}</em></h1><p class="lead">{{ isPt() ? 'Resultados instantâneos, gráficos claros e seus dados somente neste dispositivo.' : 'Instant results, clear charts and your data stays on this device.' }}</p></div>
+      <button class="export" type="button" (click)="exportExcel()" [disabled]="exporting()"><span>↓</span> {{ exporting() ? (isPt() ? 'GERANDO...' : 'CREATING...') : (isPt() ? 'EXPORTAR EXCEL' : 'EXPORT EXCEL') }}</button>
+    </div>
     <nav aria-label="Calculadoras">
       <button [class.active]="activeTab() === 'hourly'" (click)="select('hourly')">{{ isPt() ? 'Valor-hora' : 'Hourly rate' }}</button>
       <button [class.active]="activeTab() === 'interest'" (click)="select('interest')">{{ isPt() ? 'Juros compostos' : 'Compound interest' }}</button>
       <button [class.active]="activeTab() === 'travel'" (click)="select('travel')">{{ isPt() ? 'Deslocamento' : 'Commuting' }}</button>
+      <button [class.active]="activeTab() === 'loan'" (click)="select('loan')">{{ isPt() ? 'Financiamento' : 'Loan' }}</button>
+      <button [class.active]="activeTab() === 'discount'" (click)="select('discount')">{{ isPt() ? 'Descontos' : 'Discounts' }}</button>
     </nav>
 
     @if (activeTab() === 'hourly') {
@@ -18,7 +21,7 @@
           <label>{{ isPt() ? 'Horas faturáveis por mês' : 'Billable hours per month' }}<input type="number" min="1" [(ngModel)]="monthlyHours"></label>
           <label>{{ isPt() ? 'Margem para reserva e lucro (%)' : 'Profit and reserve margin (%)' }}<input type="number" min="0" max="95" [(ngModel)]="profitMargin"></label>
         </div>
-        <aside><span>{{ isPt() ? 'VALOR-HORA SUGERIDO' : 'SUGGESTED HOURLY RATE' }}</span><strong>{{ money(hourlyRate()) }}</strong><p>{{ isPt() ? 'Cobre a renda, os custos e a margem informada.' : 'Covers income, costs and the selected margin.' }}</p></aside>
+        <aside><span>{{ isPt() ? 'VALOR-HORA SUGERIDO' : 'SUGGESTED HOURLY RATE' }}</span><strong>{{ money(hourlyRate()) }}</strong><div class="bar-chart"><div><i [style.width.%]="percentWidth(hourlyBase(), hourlyRate())"></i></div><p><b>{{ money(hourlyBase()) }}</b> {{ isPt() ? 'base' : 'base' }}</p><div><i class="accent" [style.width.%]="percentWidth(hourlyRate(), hourlyRate())"></i></div><p><b>{{ money(hourlyRate()) }}</b> {{ isPt() ? 'com margem' : 'with margin' }}</p></div></aside>
       </section>
     }
     @if (activeTab() === 'interest') {
@@ -27,22 +30,40 @@
           <label>{{ isPt() ? 'Valor inicial' : 'Initial amount' }}<input type="number" min="0" [(ngModel)]="initialAmount"></label>
           <label>{{ isPt() ? 'Aporte mensal' : 'Monthly deposit' }}<input type="number" min="0" [(ngModel)]="monthlyDeposit"></label>
           <label>{{ isPt() ? 'Taxa mensal (%)' : 'Monthly rate (%)' }}<input type="number" min="0" step="0.01" [(ngModel)]="monthlyRate"></label>
-          <label>{{ isPt() ? 'Prazo em meses' : 'Term in months' }}<input type="number" min="0" [(ngModel)]="months"></label>
+          <label>{{ isPt() ? 'Prazo em meses' : 'Term in months' }}<input type="number" min="0" max="1200" [(ngModel)]="months"></label>
         </div>
-        <aside><span>{{ isPt() ? 'SALDO PROJETADO' : 'PROJECTED BALANCE' }}</span><strong>{{ money(investmentTotal()) }}</strong><p>{{ isPt() ? 'Total investido:' : 'Total invested:' }} {{ money(investedAmount()) }}<br>{{ isPt() ? 'Rendimento estimado:' : 'Estimated earnings:' }} {{ money(investmentTotal() - investedAmount()) }}</p></aside>
+        <aside><span>{{ isPt() ? 'SALDO PROJETADO' : 'PROJECTED BALANCE' }}</span><strong>{{ money(investmentTotal()) }}</strong><svg class="line-chart" viewBox="0 0 100 44" preserveAspectRatio="none" role="img" [attr.aria-label]="isPt() ? 'Evolução do saldo' : 'Balance growth'"><polyline [attr.points]="interestChartPoints()"></polyline></svg><p>{{ isPt() ? 'Investido:' : 'Invested:' }} {{ money(investedAmount()) }} · {{ isPt() ? 'Rendimento:' : 'Earnings:' }} {{ money(investmentTotal() - investedAmount()) }}</p></aside>
       </section>
     }
     @if (activeTab() === 'travel') {
       <section class="calculator">
         <div class="fields compact">
-          <label>{{ isPt() ? 'Distância diária (km)' : 'Daily distance (km)' }}<input type="number" min="0" [(ngModel)]="distance"></label>
-          <label>{{ isPt() ? 'Dias por mês' : 'Days per month' }}<input type="number" min="0" max="31" [(ngModel)]="workDays"></label>
-          <label>{{ isPt() ? 'Combustível (R$/L)' : 'Fuel (R$/L)' }}<input type="number" min="0" step="0.01" [(ngModel)]="fuelPrice"></label>
-          <label>{{ isPt() ? 'Consumo combustão (km/L)' : 'Fuel efficiency (km/L)' }}<input type="number" min="0.1" step="0.1" [(ngModel)]="fuelEfficiency"></label>
-          <label>{{ isPt() ? 'Consumo elétrico (km/kWh)' : 'EV efficiency (km/kWh)' }}<input type="number" min="0.1" step="0.1" [(ngModel)]="electricEfficiency"></label>
-          <label>{{ isPt() ? 'Energia (R$/kWh)' : 'Energy (R$/kWh)' }}<input type="number" min="0" step="0.01" [(ngModel)]="energyPrice"></label>
+          <label>{{ isPt() ? 'Distância diária (km)' : 'Daily distance (km)' }}<input type="number" min="0" [(ngModel)]="distance"></label><label>{{ isPt() ? 'Dias por mês' : 'Days per month' }}<input type="number" min="0" max="31" [(ngModel)]="workDays"></label>
+          <label>{{ isPt() ? 'Combustível (R$/L)' : 'Fuel (R$/L)' }}<input type="number" min="0" step="0.01" [(ngModel)]="fuelPrice"></label><label>{{ isPt() ? 'Consumo combustão (km/L)' : 'Fuel efficiency (km/L)' }}<input type="number" min="0.1" step="0.1" [(ngModel)]="fuelEfficiency"></label>
+          <label>{{ isPt() ? 'Consumo elétrico (km/kWh)' : 'EV efficiency (km/kWh)' }}<input type="number" min="0.1" step="0.1" [(ngModel)]="electricEfficiency"></label><label>{{ isPt() ? 'Energia (R$/kWh)' : 'Energy (R$/kWh)' }}<input type="number" min="0" step="0.01" [(ngModel)]="energyPrice"></label>
         </div>
-        <aside><span>{{ isPt() ? 'CUSTO MENSAL ESTIMADO' : 'ESTIMATED MONTHLY COST' }}</span><div class="comparison"><p>{{ isPt() ? 'Combustão' : 'Fuel' }}<strong>{{ money(fuelMonthly()) }}</strong></p><p>{{ isPt() ? 'Elétrico' : 'Electric' }}<strong>{{ money(electricMonthly()) }}</strong></p></div><p>{{ isPt() ? 'Economia potencial:' : 'Potential savings:' }} {{ money(travelSavings()) }}</p></aside>
+        <aside><span>{{ isPt() ? 'CUSTO MENSAL ESTIMADO' : 'ESTIMATED MONTHLY COST' }}</span><div class="columns"><div><i [style.height.%]="percentWidth(fuelMonthly(), travelMaximum())"></i><b>{{ money(fuelMonthly()) }}</b><small>{{ isPt() ? 'Combustão' : 'Fuel' }}</small></div><div><i class="accent" [style.height.%]="percentWidth(electricMonthly(), travelMaximum())"></i><b>{{ money(electricMonthly()) }}</b><small>{{ isPt() ? 'Elétrico' : 'Electric' }}</small></div></div><p>{{ isPt() ? 'Economia potencial:' : 'Potential savings:' }} {{ money(travelSavings()) }}</p></aside>
+      </section>
+    }
+    @if (activeTab() === 'loan') {
+      <section class="calculator">
+        <div class="fields loan-fields">
+          <label>{{ isPt() ? 'Valor financiado' : 'Loan amount' }}<input type="number" min="0" [(ngModel)]="loanAmount"></label>
+          <label>{{ isPt() ? 'Taxa anual (%)' : 'Annual rate (%)' }}<input type="number" min="0" step="0.01" [(ngModel)]="loanAnnualRate"></label>
+          <label>{{ isPt() ? 'Prazo em meses' : 'Term in months' }}<input type="number" min="1" max="600" [(ngModel)]="loanMonths"></label>
+        </div>
+        <aside><span>{{ isPt() ? 'PARCELA FIXA ESTIMADA' : 'ESTIMATED FIXED PAYMENT' }}</span><strong>{{ money(loanPayment()) }}</strong><svg class="line-chart downward" viewBox="0 0 100 44" preserveAspectRatio="none" role="img" [attr.aria-label]="isPt() ? 'Redução do saldo devedor' : 'Loan balance reduction'"><polyline [attr.points]="loanChartPoints()"></polyline></svg><p>{{ isPt() ? 'Total pago:' : 'Total paid:' }} {{ money(loanTotal()) }} · {{ isPt() ? 'Juros:' : 'Interest:' }} {{ money(loanInterest()) }}</p></aside>
+      </section>
+    }
+    @if (activeTab() === 'discount') {
+      <section class="calculator">
+        <div class="fields">
+          <label>{{ isPt() ? 'Preço original' : 'Original price' }}<input type="number" min="0" [(ngModel)]="originalPrice"></label>
+          <label>{{ isPt() ? 'Desconto principal (%)' : 'Main discount (%)' }}<input type="number" min="0" max="100" [(ngModel)]="discountRate"></label>
+          <label>{{ isPt() ? 'Desconto adicional (%)' : 'Additional discount (%)' }}<input type="number" min="0" max="100" [(ngModel)]="additionalDiscount"></label>
+          <label>{{ isPt() ? 'Número de parcelas' : 'Installments' }}<input type="number" min="1" max="120" [(ngModel)]="installments"></label>
+        </div>
+        <aside><span>{{ isPt() ? 'PREÇO FINAL' : 'FINAL PRICE' }}</span><strong>{{ money(discountedPrice()) }}</strong><div class="donut" [style.--saved]="percentWidth(savedAmount(), originalPrice) + '%'" role="img" [attr.aria-label]="(isPt() ? 'Economia de ' : 'Savings of ') + money(savedAmount())"><b>{{ percentWidth(savedAmount(), originalPrice).toFixed(1) }}%</b></div><p>{{ isPt() ? 'Economia:' : 'Savings:' }} {{ money(savedAmount()) }} · {{ installments }}x {{ money(installmentValue()) }}</p></aside>
       </section>
     }
     <p class="disclaimer">{{ isPt() ? 'Resultados são estimativas educacionais e não constituem aconselhamento financeiro.' : 'Results are educational estimates and do not constitute financial advice.' }}</p>
