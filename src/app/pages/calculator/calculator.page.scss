@@ -1,9 +1,17 @@
+/* Paleta local da página: mantém o tema isolado dentro do componente. */
 :host { --lime: #b8f34a; --ink: #eef0e8; --muted: #969b91; --panel: #151714; --line: #2a2e28; }
 ion-content { --background: #0c0e0c; --color: var(--ink); }
+
+/* Cabeçalho superior com retorno ao portfólio e seletor de idioma. */
 header { height: 70px; padding: 0 max(20px, calc((100vw - 1120px) / 2)); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
 header a { color: var(--ink); text-decoration: none; }
 button { cursor: pointer; }
 header button { padding: 8px 11px; color: var(--lime); border: 1px solid var(--line); background: none; font: 700 .75rem monospace; }
+
+/*
+ * Drawer do estudo de caso. O acionador usa position: fixed e fica fora do
+ * ion-content; backdrop e painel recebem camadas superiores por z-index.
+ */
 .project-menu-trigger { position: fixed; z-index: 20; top: 50%; right: 0; display: flex; align-items: center; gap: 10px; padding: 13px 15px; color: #0c0e0c; border: 0; background: var(--lime); transform: translateY(-50%); writing-mode: vertical-rl; box-shadow: 0 12px 35px #0008; }
 .project-menu-trigger span { font: 400 1.2rem/1 sans-serif; }
 .project-menu-trigger b { font: 700 .65rem/1 monospace; letter-spacing: .11em; }
@@ -27,6 +35,8 @@ header button { padding: 8px 11px; color: var(--lime); border: 1px solid var(--l
 .drawer-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 20px; }
 .drawer-tags span { padding: 6px 8px; color: #c7cbc2; border: 1px solid var(--line); font: .65rem monospace; }
 .drawer-link { display: flex; justify-content: space-between; margin-top: 8px; padding: 17px 0; color: var(--lime); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); text-decoration: none; font: 700 .7rem monospace; letter-spacing: .08em; }
+
+/* Apresentação, botão de exportação e seletor horizontal de calculadoras. */
 main { width: min(1120px, calc(100% - 32px)); margin: auto; padding: 72px 0; }
 .intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; }
 .eyebrow { color: var(--lime); font: 600 .72rem monospace; letter-spacing: .14em; }
@@ -40,6 +50,11 @@ h1 em { color: var(--lime); }
 nav { display: flex; gap: 8px; margin: 45px 0 20px; overflow-x: auto; padding-bottom: 2px; }
 nav button { padding: 13px 17px; white-space: nowrap; color: var(--muted); border: 1px solid var(--line); background: transparent; }
 nav button.active { color: #0c0e0c; border-color: var(--lime); background: var(--lime); font-weight: 700; }
+
+/*
+ * Estrutura compartilhada pelas cinco telas: entradas à esquerda e resultado
+ * visual à direita. As variantes compact e loan-fields ajustam casos específicos.
+ */
 .calculator { display: grid; grid-template-columns: 1.08fr .92fr; min-height: 390px; border: 1px solid var(--line); background: var(--panel); }
 .fields { align-content: center; padding: 34px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
 .fields.compact { gap: 14px 20px; }
@@ -51,25 +66,35 @@ aside { min-width: 0; padding: 34px; display: flex; flex-direction: column; just
 aside > span { color: var(--lime); font: .7rem monospace; letter-spacing: .1em; }
 aside > strong { display: block; margin: 17px 0; font: 400 clamp(2rem, 4vw, 3.5rem)/1 Georgia, serif; }
 aside > p { color: var(--muted); line-height: 1.6; }
+
+/* Barras horizontais da tela de valor-hora. */
 .bar-chart { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 9px 14px; margin: 12px 0; }
 .bar-chart > div { height: 13px; background: #272b25; }
 .bar-chart i { display: block; height: 100%; background: #6c735f; }
 .bar-chart i.accent { background: var(--lime); }
 .bar-chart p { margin: 0; color: var(--muted); font-size: .7rem; }
 .bar-chart b { color: var(--ink); }
+
+/* Linhas SVG usadas nas telas de investimento e financiamento. */
 .line-chart { width: 100%; height: 120px; margin: 8px 0; border-bottom: 1px solid var(--line); overflow: visible; }
 .line-chart polyline { fill: none; stroke: var(--lime); stroke-width: 1.3; vector-effect: non-scaling-stroke; }
 .line-chart.downward polyline { stroke: #d5b26f; }
+
+/* Colunas comparativas dos custos de deslocamento. */
 .columns { height: 175px; display: flex; align-items: flex-end; justify-content: center; gap: 36px; margin: 10px 0; border-bottom: 1px solid var(--line); }
 .columns div { width: 105px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; text-align: center; }
 .columns i { display: block; min-height: 3px; background: #d5b26f; }
 .columns i.accent { background: var(--lime); }
 .columns b { margin-top: 9px; font-size: .78rem; }
 .columns small { margin: 4px 0 9px; color: var(--muted); }
+
+/* Rosca de economia: conic-gradient lê a porcentagem da variável --saved. */
 .donut { --saved: 0%; width: 132px; aspect-ratio: 1; margin: 6px auto 14px; display: grid; place-items: center; border-radius: 50%; background: conic-gradient(var(--lime) var(--saved), #292d27 0); position: relative; }
 .donut::after { content: ''; position: absolute; inset: 18px; border-radius: 50%; background: #111310; }
 .donut b { z-index: 1; font: 700 1rem monospace; }
 .disclaimer { color: #696e65; font-size: .72rem; text-align: center; margin-top: 22px; }
+
+/* Em telas estreitas, formulário e resultado ficam empilhados e o drawer vira um botão inferior. */
 @media (max-width: 760px) {
   main { padding-top: 50px; }
   .intro { align-items: flex-start; flex-direction: column; }
@@ -80,4 +105,5 @@ aside > p { color: var(--muted); line-height: 1.6; }
   .project-menu-trigger { top: auto; right: 14px; bottom: 14px; transform: none; writing-mode: horizontal-tb; }
   .project-drawer { padding: 22px 24px 36px; }
 }
+/* Remove a animação do painel quando o usuário prefere movimento reduzido. */
 @media (prefers-reduced-motion: reduce) { .project-drawer { transition: none; } }

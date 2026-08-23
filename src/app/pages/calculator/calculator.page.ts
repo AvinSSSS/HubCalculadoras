@@ -6,48 +6,90 @@ import { LanguageService } from '../../core/language.service';
 type CalculatorTab = 'hourly' | 'interest' | 'travel' | 'loan' | 'discount';
 type ExportRow = Record<string, string | number>;
 
+/**
+ * Página principal do Hub de Calculadoras.
+ *
+ * A classe concentra os valores digitados, os resultados reativos, a geração
+ * dos pontos dos gráficos e a exportação da calculadora ativa para Excel.
+ * Nenhum dado é enviado a servidor: todas as operações acontecem no navegador.
+ */
 @Component({ selector: 'app-calculator', templateUrl: './calculator.page.html', styleUrls: ['./calculator.page.scss'], standalone: true, imports: [IonContent, FormsModule] })
 export class CalculatorPage {
+  // Serviços e estado geral da interface.
   readonly language = inject(LanguageService);
   readonly activeTab = signal<CalculatorTab>('hourly');
   readonly exporting = signal(false);
   readonly projectMenuOpen = signal(false);
+
+  // Entradas da tela "Valor-hora".
   desiredIncome = 8000; monthlyCosts = 1200; monthlyHours = 120; profitMargin = 20;
+  // Entradas da tela "Juros compostos".
   initialAmount = 10000; monthlyDeposit = 500; monthlyRate = 0.8; months = 60;
+  // Entradas da tela "Deslocamento".
   distance = 40; workDays = 22; fuelPrice = 6; fuelEfficiency = 11; electricEfficiency = 6; energyPrice = 0.95;
+  // Entradas da tela "Financiamento".
   loanAmount = 50000; loanAnnualRate = 18; loanMonths = 36;
+  // Entradas da tela "Descontos".
   originalPrice = 1000; discountRate = 10; additionalDiscount = 5; installments = 10;
 
+  /*
+   * Valor-hora: soma renda e custos, divide pelas horas faturáveis e ajusta a
+   * tarifa para que a margem desejada esteja contida no preço final.
+   * Math.max impede divisão por zero; a margem é limitada a 95%.
+   */
   readonly hourlyRate = computed(() => this.positive((this.desiredIncome + this.monthlyCosts) / Math.max(this.monthlyHours, 1) / (1 - this.percent(this.profitMargin, 95))));
   readonly hourlyBase = computed(() => this.positive((this.desiredIncome + this.monthlyCosts) / Math.max(this.monthlyHours, 1)));
+
+  // Juros compostos: a série mensal alimenta o resultado, o gráfico e o Excel.
   readonly interestRows = computed(() => this.buildInterestRows());
   readonly investmentTotal = computed(() => {
     const rows = this.interestRows();
     return rows[rows.length - 1]?.balance ?? this.positive(this.initialAmount);
   });
   readonly investedAmount = computed(() => this.positive(this.initialAmount + this.monthlyDeposit * Math.max(Math.floor(this.months), 0)));
+
+  // Deslocamento: distância mensal dividida pela eficiência e multiplicada pelo preço da fonte de energia.
   readonly fuelMonthly = computed(() => this.positive((this.distance * this.workDays / Math.max(this.fuelEfficiency, .1)) * this.fuelPrice));
   readonly electricMonthly = computed(() => this.positive((this.distance * this.workDays / Math.max(this.electricEfficiency, .1)) * this.energyPrice));
   readonly travelSavings = computed(() => Math.abs(this.fuelMonthly() - this.electricMonthly()));
   readonly travelMaximum = computed(() => Math.max(this.fuelMonthly(), this.electricMonthly(), 1));
+
+  // Financiamento: cronograma Price usado para parcela, total, juros e gráfico do saldo.
   readonly loanRows = computed(() => this.buildLoanRows());
   readonly loanPayment = computed(() => this.loanRows()[0]?.payment ?? 0);
   readonly loanTotal = computed(() => this.loanRows().reduce((total, row) => total + row.payment, 0));
   readonly loanInterest = computed(() => this.positive(this.loanTotal() - this.positive(this.loanAmount)));
+
+  // Descontos sucessivos são multiplicativos: o segundo incide sobre o preço já reduzido.
   readonly discountedPrice = computed(() => this.positive(this.originalPrice) * (1 - this.percent(this.discountRate)) * (1 - this.percent(this.additionalDiscount)));
   readonly savedAmount = computed(() => this.positive(this.originalPrice) - this.discountedPrice());
   readonly installmentValue = computed(() => this.discountedPrice() / Math.max(Math.floor(this.installments), 1));
 
+  /** Informa qual idioma deve ser usado pelos textos e formatos monetários. */
   isPt(): boolean { return this.language.current() === 'pt'; }
+  /** Troca a calculadora exibida sem navegar ou recarregar a página. */
   select(tab: CalculatorTab): void { this.activeTab.set(tab); }
+  /** Abre ou fecha o estudo de caso lateral. */
   toggleProjectMenu(): void { this.projectMenuOpen.update(open => !open); }
+  /** Fecha explicitamente o estudo de caso lateral. */
   closeProjectMenu(): void { this.projectMenuOpen.set(false); }
+  /** Permite fechar o drawer pela tecla Escape, além do botão e do backdrop. */
   @HostListener('document:keydown.escape') onEscape(): void { this.closeProjectMenu(); }
+  /** Formata valores sempre em reais, respeitando a pontuação do idioma atual. */
   money(value: number): string { return new Intl.NumberFormat(this.isPt() ? 'pt-BR' : 'en-US', { style: 'currency', currency: 'BRL' }).format(value); }
+  /** Converte uma proporção para a faixa visual segura de 0% a 100%. */
   percentWidth(value: number, maximum: number): number { return maximum > 0 ? Math.min(Math.max(value / maximum * 100, 0), 100) : 0; }
+  /** Produz a polyline SVG do crescimento do investimento. */
   interestChartPoints(): string { return this.chartPoints(this.sample(this.interestRows().map(row => row.balance), 18)); }
+  /** Produz a polyline SVG da redução do saldo devedor. */
   loanChartPoints(): string { return this.chartPoints(this.sample(this.loanRows().map(row => row.balance), 18)); }
 
+  /**
+   * Exporta a calculadora selecionada como .xlsx.
+   * O import dinâmico evita carregar a biblioteca SheetJS durante a abertura
+   * normal da página. A flag `exporting` evita cliques repetidos enquanto o
+   * arquivo é preparado e é restaurada mesmo se ocorrer uma falha.
+   */
   async exportExcel(): Promise<void> {
     this.exporting.set(true);
     try {
@@ -61,6 +103,11 @@ export class CalculatorPage {
     } finally { this.exporting.set(false); }
   }
 
+  /**
+   * Monta uma linha para cada mês do investimento.
+   * Em cada período, os juros incidem primeiro sobre o saldo e o aporte é
+   * acrescentado ao final. O limite de 1.200 meses protege a interface.
+   */
   private buildInterestRows(): { month: number; invested: number; earnings: number; balance: number }[] {
     const periods = Math.min(Math.max(Math.floor(this.months), 0), 1200);
     const rate = this.positive(this.monthlyRate) / 100;
@@ -75,6 +122,11 @@ export class CalculatorPage {
     return rows;
   }
 
+  /**
+   * Gera o cronograma de amortização pela Tabela Price.
+   * A taxa anual é convertida em mensal; cada parcela separa juros e principal.
+   * Para taxa zero, o principal é simplesmente dividido pelo prazo.
+   */
   private buildLoanRows(): { month: number; payment: number; principal: number; interest: number; balance: number }[] {
     const principal = this.positive(this.loanAmount);
     const periods = Math.min(Math.max(Math.floor(this.loanMonths), 1), 600);
@@ -91,6 +143,11 @@ export class CalculatorPage {
     return rows;
   }
 
+  /**
+   * Traduz o estado da aba ativa para linhas tabulares.
+   * Os nomes das colunas acompanham o idioma selecionado e cada calculadora
+   * entrega o nível de detalhe adequado: resumo ou evolução período a período.
+   */
   private exportData(): { name: string; rows: ExportRow[] } {
     const pt = this.isPt();
     switch (this.activeTab()) {
@@ -111,16 +168,20 @@ export class CalculatorPage {
     }
   }
 
+  /** Normaliza uma série numérica para o viewBox 100 × 44 usado pelos SVGs. */
   private chartPoints(values: number[]): string {
     if (!values.length) return '';
     const max = Math.max(...values, 1);
     const span = Math.max(values.length - 1, 1);
     return values.map((value, index) => `${index / span * 100},${40 - value / max * 36}`).join(' ');
   }
+  /** Reduz séries extensas a uma amostra uniforme para manter o SVG leve. */
   private sample(values: number[], count: number): number[] {
     if (values.length <= count) return values;
     return Array.from({ length: count }, (_, index) => values[Math.round(index * (values.length - 1) / (count - 1))]);
   }
+  /** Converte uma porcentagem digitada para decimal, respeitando um teto. */
   private percent(value: number, maximum = 100): number { return Math.min(this.positive(value), maximum) / 100; }
+  /** Neutraliza NaN, infinito e números negativos antes de usá-los nas fórmulas. */
   private positive(value: number): number { return Number.isFinite(value) ? Math.max(value, 0) : 0; }
 }

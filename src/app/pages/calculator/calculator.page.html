@@ -1,10 +1,12 @@
-<ion-content>
-  <header><a href="https://avinssss.github.io/Portifolio/" class="back">← {{ isPt() ? 'Portfólio' : 'Portfolio' }}</a><button type="button" (click)="language.toggle()">{{ isPt() ? 'EN' : 'PT' }}</button></header>
-  <button class="project-menu-trigger" type="button" (click)="toggleProjectMenu()" [attr.aria-expanded]="projectMenuOpen()" aria-controls="project-menu">
-    <span aria-hidden="true">＋</span><b>{{ isPt() ? 'SOBRE O PROJETO' : 'ABOUT THE PROJECT' }}</b>
-  </button>
-  @if (projectMenuOpen()) { <button class="drawer-backdrop" type="button" (click)="closeProjectMenu()" [attr.aria-label]="isPt() ? 'Fechar informações do projeto' : 'Close project information'"></button> }
-  <section id="project-menu" class="project-drawer" [class.open]="projectMenuOpen()" [attr.aria-hidden]="!projectMenuOpen()" aria-labelledby="project-menu-title">
+<!--
+  Acionador e drawer ficam fora do ion-content para não serem recortados pela
+  área rolável do Ionic. O painel apresenta o estudo de caso do projeto.
+-->
+<button class="project-menu-trigger" type="button" (click)="toggleProjectMenu()" [attr.aria-expanded]="projectMenuOpen()" aria-controls="project-menu">
+  <span aria-hidden="true">＋</span><b>{{ isPt() ? 'SOBRE O PROJETO' : 'ABOUT THE PROJECT' }}</b>
+</button>
+@if (projectMenuOpen()) { <button class="drawer-backdrop" type="button" (click)="closeProjectMenu()" [attr.aria-label]="isPt() ? 'Fechar informações do projeto' : 'Close project information'"></button> }
+<section id="project-menu" class="project-drawer" [class.open]="projectMenuOpen()" [attr.aria-hidden]="!projectMenuOpen()" aria-labelledby="project-menu-title">
     <div class="drawer-heading"><p>CASE STUDY / 01</p><button type="button" (click)="closeProjectMenu()" [attr.aria-label]="isPt() ? 'Fechar menu' : 'Close menu'">×</button></div>
     <h2 id="project-menu-title">{{ isPt() ? 'Por trás do' : 'Behind the' }} <em>{{ isPt() ? 'Hub.' : 'Hub.' }}</em></h2>
     <article>
@@ -28,11 +30,18 @@
     </article>
     <a class="drawer-link" href="https://github.com/AvinSSSS/HubCalculadoras" target="_blank" rel="noreferrer">{{ isPt() ? 'VER CÓDIGO-FONTE' : 'VIEW SOURCE CODE' }} <span>↗</span></a>
   </section>
+
+<!-- Área rolável principal da aplicação. -->
+<ion-content>
+  <!-- Cabeçalho com retorno ao portfólio e alternância global PT/EN. -->
+  <header><a href="https://avinssss.github.io/Portifolio/" class="back">← {{ isPt() ? 'Portfólio' : 'Portfolio' }}</a><button type="button" (click)="language.toggle()">{{ isPt() ? 'EN' : 'PT' }}</button></header>
   <main>
+    <!-- Apresentação da ferramenta e exportação da aba atualmente selecionada. -->
     <div class="intro">
       <div><p class="eyebrow">{{ isPt() ? 'FERRAMENTAS SEM ANÚNCIOS' : 'AD-FREE TOOLS' }}</p><h1>{{ isPt() ? 'Hub de' : 'Useful' }} <em>{{ isPt() ? 'Calculadoras' : 'Calculators' }}</em></h1><p class="lead">{{ isPt() ? 'Resultados instantâneos, gráficos claros e seus dados somente neste dispositivo.' : 'Instant results, clear charts and your data stays on this device.' }}</p></div>
       <button class="export" type="button" (click)="exportExcel()" [disabled]="exporting()"><span>↓</span> {{ exporting() ? (isPt() ? 'GERANDO...' : 'CREATING...') : (isPt() ? 'EXPORTAR EXCEL' : 'EXPORT EXCEL') }}</button>
     </div>
+    <!-- As abas apenas alteram um Signal; não há recarregamento nem mudança de rota. -->
     <nav aria-label="Calculadoras">
       <button [class.active]="activeTab() === 'hourly'" (click)="select('hourly')">{{ isPt() ? 'Valor-hora' : 'Hourly rate' }}</button>
       <button [class.active]="activeTab() === 'interest'" (click)="select('interest')">{{ isPt() ? 'Juros compostos' : 'Compound interest' }}</button>
@@ -41,6 +50,7 @@
       <button [class.active]="activeTab() === 'discount'" (click)="select('discount')">{{ isPt() ? 'Descontos' : 'Discounts' }}</button>
     </nav>
 
+    <!-- Tela 1: composição do valor-hora base e aplicação da margem de segurança/lucro. -->
     @if (activeTab() === 'hourly') {
       <section class="calculator">
         <div class="fields">
@@ -52,6 +62,7 @@
         <aside><span>{{ isPt() ? 'VALOR-HORA SUGERIDO' : 'SUGGESTED HOURLY RATE' }}</span><strong>{{ money(hourlyRate()) }}</strong><div class="bar-chart"><div><i [style.width.%]="percentWidth(hourlyBase(), hourlyRate())"></i></div><p><b>{{ money(hourlyBase()) }}</b> {{ isPt() ? 'base' : 'base' }}</p><div><i class="accent" [style.width.%]="percentWidth(hourlyRate(), hourlyRate())"></i></div><p><b>{{ money(hourlyRate()) }}</b> {{ isPt() ? 'com margem' : 'with margin' }}</p></div></aside>
       </section>
     }
+    <!-- Tela 2: projeção mensal de juros compostos com aportes ao final de cada período. -->
     @if (activeTab() === 'interest') {
       <section class="calculator">
         <div class="fields">
@@ -60,9 +71,11 @@
           <label>{{ isPt() ? 'Taxa mensal (%)' : 'Monthly rate (%)' }}<input type="number" min="0" step="0.01" [(ngModel)]="monthlyRate"></label>
           <label>{{ isPt() ? 'Prazo em meses' : 'Term in months' }}<input type="number" min="0" max="1200" [(ngModel)]="months"></label>
         </div>
+        <!-- A polyline recebe pontos normalizados pela classe TypeScript. -->
         <aside><span>{{ isPt() ? 'SALDO PROJETADO' : 'PROJECTED BALANCE' }}</span><strong>{{ money(investmentTotal()) }}</strong><svg class="line-chart" viewBox="0 0 100 44" preserveAspectRatio="none" role="img" [attr.aria-label]="isPt() ? 'Evolução do saldo' : 'Balance growth'"><polyline [attr.points]="interestChartPoints()"></polyline></svg><p>{{ isPt() ? 'Investido:' : 'Invested:' }} {{ money(investedAmount()) }} · {{ isPt() ? 'Rendimento:' : 'Earnings:' }} {{ money(investmentTotal() - investedAmount()) }}</p></aside>
       </section>
     }
+    <!-- Tela 3: comparação mensal entre veículo a combustão e elétrico. -->
     @if (activeTab() === 'travel') {
       <section class="calculator">
         <div class="fields compact">
@@ -73,6 +86,7 @@
         <aside><span>{{ isPt() ? 'CUSTO MENSAL ESTIMADO' : 'ESTIMATED MONTHLY COST' }}</span><div class="columns"><div><i [style.height.%]="percentWidth(fuelMonthly(), travelMaximum())"></i><b>{{ money(fuelMonthly()) }}</b><small>{{ isPt() ? 'Combustão' : 'Fuel' }}</small></div><div><i class="accent" [style.height.%]="percentWidth(electricMonthly(), travelMaximum())"></i><b>{{ money(electricMonthly()) }}</b><small>{{ isPt() ? 'Elétrico' : 'Electric' }}</small></div></div><p>{{ isPt() ? 'Economia potencial:' : 'Potential savings:' }} {{ money(travelSavings()) }}</p></aside>
       </section>
     }
+    <!-- Tela 4: parcela fixa e cronograma de amortização pela Tabela Price. -->
     @if (activeTab() === 'loan') {
       <section class="calculator">
         <div class="fields loan-fields">
@@ -83,6 +97,7 @@
         <aside><span>{{ isPt() ? 'PARCELA FIXA ESTIMADA' : 'ESTIMATED FIXED PAYMENT' }}</span><strong>{{ money(loanPayment()) }}</strong><svg class="line-chart downward" viewBox="0 0 100 44" preserveAspectRatio="none" role="img" [attr.aria-label]="isPt() ? 'Redução do saldo devedor' : 'Loan balance reduction'"><polyline [attr.points]="loanChartPoints()"></polyline></svg><p>{{ isPt() ? 'Total pago:' : 'Total paid:' }} {{ money(loanTotal()) }} · {{ isPt() ? 'Juros:' : 'Interest:' }} {{ money(loanInterest()) }}</p></aside>
       </section>
     }
+    <!-- Tela 5: descontos sucessivos, economia total e divisão em parcelas. -->
     @if (activeTab() === 'discount') {
       <section class="calculator">
         <div class="fields">
@@ -91,6 +106,7 @@
           <label>{{ isPt() ? 'Desconto adicional (%)' : 'Additional discount (%)' }}<input type="number" min="0" max="100" [(ngModel)]="additionalDiscount"></label>
           <label>{{ isPt() ? 'Número de parcelas' : 'Installments' }}<input type="number" min="1" max="120" [(ngModel)]="installments"></label>
         </div>
+        <!-- A variável CSS --saved controla a fatia verde do gráfico de rosca. -->
         <aside><span>{{ isPt() ? 'PREÇO FINAL' : 'FINAL PRICE' }}</span><strong>{{ money(discountedPrice()) }}</strong><div class="donut" [style.--saved]="percentWidth(savedAmount(), originalPrice) + '%'" role="img" [attr.aria-label]="(isPt() ? 'Economia de ' : 'Savings of ') + money(savedAmount())"><b>{{ percentWidth(savedAmount(), originalPrice).toFixed(1) }}%</b></div><p>{{ isPt() ? 'Economia:' : 'Savings:' }} {{ money(savedAmount()) }} · {{ installments }}x {{ money(installmentValue()) }}</p></aside>
       </section>
     }
