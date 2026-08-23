@@ -111,6 +111,8 @@ aside > p { color: var(--muted); line-height: 1.6; }
 .shopping-group.sides { border-color: #594727; background: #211c13; }
 .shopping-group.charcoal { background: #171917; }
 .shopping-group.charcoal h3 { margin: 0; }
+.barbecue-reference { margin: 2px 0 0; color: var(--muted); font-size: .66rem; line-height: 1.5; }
+.barbecue-reference a { color: var(--lime); }
 
 /* Conversor: mantém a taxa explícita e representa o fluxo entre as duas moedas. */
 .currency-fields { position: relative; }

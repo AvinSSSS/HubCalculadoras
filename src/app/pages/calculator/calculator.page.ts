@@ -22,6 +22,8 @@ export class CalculatorPage {
   readonly activeTab = signal<CalculatorTab>('hourly');
   readonly exporting = signal(false);
   readonly projectMenuOpen = signal(false);
+  // Versão reativa incrementada sempre que um input/select do formulário muda.
+  private readonly formRevision = signal(0);
 
   // Entradas da tela "Valor-hora".
   desiredIncome = 8000; monthlyCosts = 1200; monthlyHours = 120; profitMargin = 20;
@@ -43,31 +45,31 @@ export class CalculatorPage {
    * tarifa para que a margem desejada esteja contida no preço final.
    * Math.max impede divisão por zero; a margem é limitada a 95%.
    */
-  readonly hourlyRate = computed(() => this.positive((this.desiredIncome + this.monthlyCosts) / Math.max(this.monthlyHours, 1) / (1 - this.percent(this.profitMargin, 95))));
-  readonly hourlyBase = computed(() => this.positive((this.desiredIncome + this.monthlyCosts) / Math.max(this.monthlyHours, 1)));
+  readonly hourlyRate = computed(() => { this.formRevision(); return this.positive((this.desiredIncome + this.monthlyCosts) / Math.max(this.monthlyHours, 1) / (1 - this.percent(this.profitMargin, 95))); });
+  readonly hourlyBase = computed(() => { this.formRevision(); return this.positive((this.desiredIncome + this.monthlyCosts) / Math.max(this.monthlyHours, 1)); });
 
   // Juros compostos: a série mensal alimenta o resultado, o gráfico e o Excel.
-  readonly interestRows = computed(() => this.buildInterestRows());
+  readonly interestRows = computed(() => { this.formRevision(); return this.buildInterestRows(); });
   readonly investmentTotal = computed(() => {
     const rows = this.interestRows();
     return rows[rows.length - 1]?.balance ?? this.positive(this.initialAmount);
   });
-  readonly investedAmount = computed(() => this.positive(this.initialAmount + this.monthlyDeposit * Math.max(Math.floor(this.months), 0)));
+  readonly investedAmount = computed(() => { this.formRevision(); return this.positive(this.initialAmount + this.monthlyDeposit * Math.max(Math.floor(this.months), 0)); });
 
   // Deslocamento: distância mensal dividida pela eficiência e multiplicada pelo preço da fonte de energia.
-  readonly fuelMonthly = computed(() => this.positive((this.distance * this.workDays / Math.max(this.fuelEfficiency, .1)) * this.fuelPrice));
-  readonly electricMonthly = computed(() => this.positive((this.distance * this.workDays / Math.max(this.electricEfficiency, .1)) * this.energyPrice));
+  readonly fuelMonthly = computed(() => { this.formRevision(); return this.positive((this.distance * this.workDays / Math.max(this.fuelEfficiency, .1)) * this.fuelPrice); });
+  readonly electricMonthly = computed(() => { this.formRevision(); return this.positive((this.distance * this.workDays / Math.max(this.electricEfficiency, .1)) * this.energyPrice); });
   readonly travelSavings = computed(() => Math.abs(this.fuelMonthly() - this.electricMonthly()));
   readonly travelMaximum = computed(() => Math.max(this.fuelMonthly(), this.electricMonthly(), 1));
 
   // Financiamento: cronograma Price usado para parcela, total, juros e gráfico do saldo.
-  readonly loanRows = computed(() => this.buildLoanRows());
+  readonly loanRows = computed(() => { this.formRevision(); return this.buildLoanRows(); });
   readonly loanPayment = computed(() => this.loanRows()[0]?.payment ?? 0);
   readonly loanTotal = computed(() => this.loanRows().reduce((total, row) => total + row.payment, 0));
   readonly loanInterest = computed(() => this.positive(this.loanTotal() - this.positive(this.loanAmount)));
 
   // Descontos sucessivos são multiplicativos: o segundo incide sobre o preço já reduzido.
-  readonly discountedPrice = computed(() => this.positive(this.originalPrice) * (1 - this.percent(this.discountRate)) * (1 - this.percent(this.additionalDiscount)));
+  readonly discountedPrice = computed(() => { this.formRevision(); return this.positive(this.originalPrice) * (1 - this.percent(this.discountRate)) * (1 - this.percent(this.additionalDiscount)); });
   readonly savedAmount = computed(() => this.positive(this.originalPrice) - this.discountedPrice());
   readonly installmentValue = computed(() => this.discountedPrice() / Math.max(Math.floor(this.installments), 1));
 
@@ -76,28 +78,32 @@ export class CalculatorPage {
    * perfil aplicam fatores sobre carnes, bebidas e acompanhamentos.
    */
   readonly barbecueResult = computed(() => {
+    this.formRevision();
     const people = Math.max(Math.floor(this.barbecuePeople), 0);
     const children = Math.min(Math.max(Math.floor(this.barbecueChildren), 0), people);
     const adults = people - children;
-    const durationFactor = { short: .85, medium: 1, long: 1.2 }[this.barbecueDuration];
-    const profileFactor = { light: .8, normal: 1, high: 1.25 }[this.barbecueProfile];
-    const consumptionFactor = durationFactor * profileFactor;
-    const meat = (adults * .4 + children * .2) * consumptionFactor;
+    const durationAdjustment = { short: -50, medium: 0, long: 75 }[this.barbecueDuration];
+    const adultGrams = Math.min(Math.max({ light: 350, normal: 425, high: 500 }[this.barbecueProfile] + durationAdjustment, 350), 500);
+    const childGrams = Math.min(Math.max({ light: 150, normal: 175, high: 200 }[this.barbecueProfile] + durationAdjustment / 3, 150), 200);
+    const meat = (adults * adultGrams + children * childGrams) / 1000;
+    const beerPerAdult = Math.min(Math.max({ light: 1.5, normal: 1.75, high: 2 }[this.barbecueProfile] + ({ short: -.25, medium: 0, long: .25 }[this.barbecueDuration]), 1.5), 2);
+    const waterPerPerson = { short: .5, medium: .75, long: 1 }[this.barbecueDuration];
+    const charcoalPerPerson = { short: .6, medium: 1, long: 1.5 }[this.barbecueDuration];
     return {
       people, adults, children, meat,
-      picanha: meat * .45, chicken: meat * .3, sausage: meat * .25,
-      beer: adults * 1.2 * consumptionFactor,
-      soda: (adults * .45 + children * .65) * durationFactor,
-      water: people * .5 * durationFactor,
-      garlicBread: Math.ceil(people * .5 * consumptionFactor),
-      farofa: people * .1 * consumptionFactor,
-      salad: people * .12 * durationFactor,
-      charcoal: Math.max(meat, people > 0 ? 2 : 0)
+      picanha: meat * .4, chicken: meat * .4, sausage: meat * .2,
+      beer: adults * beerPerAdult,
+      soda: people * 1,
+      water: people * waterPerPerson,
+      garlicBread: people,
+      farofa: people * .1,
+      salad: people * .15,
+      charcoal: people * charcoalPerPerson
     };
   });
 
   // Conversão direta: valor de origem multiplicado pela taxa informada.
-  readonly convertedAmount = computed(() => this.positive(this.currencyAmount) * this.positive(this.exchangeRate));
+  readonly convertedAmount = computed(() => { this.formRevision(); return this.positive(this.currencyAmount) * this.positive(this.exchangeRate); });
 
   /** Informa qual idioma deve ser usado pelos textos e formatos monetários. */
   isPt(): boolean { return this.language.current() === 'pt'; }
@@ -109,6 +115,10 @@ export class CalculatorPage {
   closeProjectMenu(): void { this.projectMenuOpen.set(false); }
   /** Permite fechar o drawer pela tecla Escape, além do botão e do backdrop. */
   @HostListener('document:keydown.escape') onEscape(): void { this.closeProjectMenu(); }
+  /** Invalida os resultados em cache quando qualquer campo do formulário muda. */
+  @HostListener('input')
+  @HostListener('change')
+  onFormChange(): void { this.formRevision.update(revision => revision + 1); }
   /** Formata valores sempre em reais, respeitando a pontuação do idioma atual. */
   money(value: number): string { return new Intl.NumberFormat(this.isPt() ? 'pt-BR' : 'en-US', { style: 'currency', currency: 'BRL' }).format(value); }
   /** Formata valores usando a moeda selecionada pelo usuário. */
@@ -120,6 +130,7 @@ export class CalculatorPage {
   swapCurrencies(): void {
     [this.sourceCurrency, this.targetCurrency] = [this.targetCurrency, this.sourceCurrency];
     this.exchangeRate = this.exchangeRate > 0 ? 1 / this.exchangeRate : 0;
+    this.onFormChange();
   }
   /** Converte uma proporção para a faixa visual segura de 0% a 100%. */
   percentWidth(value: number, maximum: number): number { return maximum > 0 ? Math.min(Math.max(value / maximum * 100, 0), 100) : 0; }

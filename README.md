@@ -19,6 +19,17 @@ Web app responsivo e sem anúncios para resolver cálculos recorrentes com rapid
 
 Cada calculadora inclui um gráfico responsivo e pode exportar seus resultados para um arquivo Excel (`.xlsx`).
 
+### Referências da calculadora de churrasco
+
+A metodologia foi baseada na [Calculadora de Churrasco do Calcula Geral](https://calculageral.com.br/calculadora-churrasco), que consolida referências de Minha Receita, Assaí, Zaffari, iFood, Ki Brasa e Carvão Matão. Foram adotadas as seguintes faixas:
+
+- Carne: 350–500 g por adulto e 150–200 g por criança, dividida em 40% bovina, 40% frango e 20% linguiça.
+- Bebidas: 1,5–2 L de cerveja por adulto, 1 L de refrigerante e 0,5–1 L de água por pessoa.
+- Acompanhamentos: 100 g de farofa, um pão de alho e 150 g de salada por pessoa.
+- Carvão: 0,6–1,5 kg por pessoa, conforme a duração do evento.
+
+Perfil e duração movimentam o consumo dentro dessas faixas. Os resultados são estimativas para planejamento e podem ser ajustados conforme o público.
+
 Todos os cálculos acontecem localmente. Nenhum valor digitado é transmitido ou armazenado.
 
 ## 🛠️ Tecnologias
