@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, HostListener, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonContent } from '@ionic/angular/standalone';
 import { LanguageService } from '../../core/language.service';
@@ -11,6 +11,7 @@ export class CalculatorPage {
   readonly language = inject(LanguageService);
   readonly activeTab = signal<CalculatorTab>('hourly');
   readonly exporting = signal(false);
+  readonly projectMenuOpen = signal(false);
   desiredIncome = 8000; monthlyCosts = 1200; monthlyHours = 120; profitMargin = 20;
   initialAmount = 10000; monthlyDeposit = 500; monthlyRate = 0.8; months = 60;
   distance = 40; workDays = 22; fuelPrice = 6; fuelEfficiency = 11; electricEfficiency = 6; energyPrice = 0.95;
@@ -39,6 +40,9 @@ export class CalculatorPage {
 
   isPt(): boolean { return this.language.current() === 'pt'; }
   select(tab: CalculatorTab): void { this.activeTab.set(tab); }
+  toggleProjectMenu(): void { this.projectMenuOpen.update(open => !open); }
+  closeProjectMenu(): void { this.projectMenuOpen.set(false); }
+  @HostListener('document:keydown.escape') onEscape(): void { this.closeProjectMenu(); }
   money(value: number): string { return new Intl.NumberFormat(this.isPt() ? 'pt-BR' : 'en-US', { style: 'currency', currency: 'BRL' }).format(value); }
   percentWidth(value: number, maximum: number): number { return maximum > 0 ? Math.min(Math.max(value / maximum * 100, 0), 100) : 0; }
   interestChartPoints(): string { return this.chartPoints(this.sample(this.interestRows().map(row => row.balance), 18)); }

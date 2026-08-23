@@ -42,4 +42,11 @@ describe('CalculatorPage', () => {
     expect(component.discountedPrice()).toBe(810);
     expect(component.installmentValue()).toBe(270);
   });
+
+  it('should open and close the project information menu', () => {
+    component.toggleProjectMenu();
+    expect(component.projectMenuOpen()).toBeTrue();
+    component.onEscape();
+    expect(component.projectMenuOpen()).toBeFalse();
+  });
 });

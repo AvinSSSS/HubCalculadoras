@@ -1,5 +1,33 @@
 <ion-content>
   <header><a href="https://avinssss.github.io/Portifolio/" class="back">← {{ isPt() ? 'Portfólio' : 'Portfolio' }}</a><button type="button" (click)="language.toggle()">{{ isPt() ? 'EN' : 'PT' }}</button></header>
+  <button class="project-menu-trigger" type="button" (click)="toggleProjectMenu()" [attr.aria-expanded]="projectMenuOpen()" aria-controls="project-menu">
+    <span aria-hidden="true">＋</span><b>{{ isPt() ? 'SOBRE O PROJETO' : 'ABOUT THE PROJECT' }}</b>
+  </button>
+  @if (projectMenuOpen()) { <button class="drawer-backdrop" type="button" (click)="closeProjectMenu()" [attr.aria-label]="isPt() ? 'Fechar informações do projeto' : 'Close project information'"></button> }
+  <section id="project-menu" class="project-drawer" [class.open]="projectMenuOpen()" [attr.aria-hidden]="!projectMenuOpen()" aria-labelledby="project-menu-title">
+    <div class="drawer-heading"><p>CASE STUDY / 01</p><button type="button" (click)="closeProjectMenu()" [attr.aria-label]="isPt() ? 'Fechar menu' : 'Close menu'">×</button></div>
+    <h2 id="project-menu-title">{{ isPt() ? 'Por trás do' : 'Behind the' }} <em>{{ isPt() ? 'Hub.' : 'Hub.' }}</em></h2>
+    <article>
+      <span>01 / {{ isPt() ? 'O MOTIVO' : 'WHY' }}</span>
+      <h3>{{ isPt() ? 'Cálculos úteis não deveriam depender de planilhas opacas.' : 'Useful calculations should not depend on opaque spreadsheets.' }}</h3>
+      <p>{{ isPt() ? 'Decisões financeiras simples costumam exigir fórmulas espalhadas, sites cheios de anúncios ou arquivos difíceis de conferir. O Hub concentra rotinas recorrentes, mostra como o resultado evolui e mantém os dados no dispositivo.' : 'Simple financial decisions often require scattered formulas, ad-heavy websites or files that are hard to audit. The Hub centralizes recurring tasks, shows how results evolve and keeps data on the device.' }}</p>
+    </article>
+    <article>
+      <span>02 / {{ isPt() ? 'TÉCNICAS APLICADAS' : 'TECHNIQUES' }}</span>
+      <ul>
+        <li><b>{{ isPt() ? 'Cálculo reativo' : 'Reactive calculation' }}</b><small>{{ isPt() ? 'Angular Signals recalculam somente os resultados afetados.' : 'Angular Signals recompute only affected results.' }}</small></li>
+        <li><b>{{ isPt() ? 'Visualização sem dependência' : 'Dependency-free charts' }}</b><small>{{ isPt() ? 'SVG e CSS geram gráficos leves, responsivos e acessíveis.' : 'SVG and CSS create lightweight, responsive and accessible charts.' }}</small></li>
+        <li><b>{{ isPt() ? 'Planilha sob demanda' : 'On-demand spreadsheet' }}</b><small>{{ isPt() ? 'O gerador XLSX só é carregado no momento da exportação.' : 'The XLSX generator loads only when an export is requested.' }}</small></li>
+        <li><b>{{ isPt() ? 'Entradas defensivas' : 'Defensive inputs' }}</b><small>{{ isPt() ? 'Limites evitam divisões por zero, valores inválidos e séries excessivas.' : 'Limits prevent division by zero, invalid values and excessive series.' }}</small></li>
+      </ul>
+    </article>
+    <article>
+      <span>03 / {{ isPt() ? 'PRIVACIDADE E QUALIDADE' : 'PRIVACY & QUALITY' }}</span>
+      <p>{{ isPt() ? 'Não há API, conta, telemetria ou armazenamento externo. Os cálculos e a planilha são produzidos localmente. Fórmulas críticas possuem testes automatizados e o projeto é verificado por build de produção e lint.' : 'There is no API, account, telemetry or external storage. Calculations and spreadsheets are produced locally. Critical formulas have automated tests and the project is checked with a production build and lint.' }}</p>
+      <div class="drawer-tags"><span>Angular 20</span><span>Ionic 8</span><span>Signals</span><span>SVG</span><span>SheetJS</span><span>Jasmine</span></div>
+    </article>
+    <a class="drawer-link" href="https://github.com/AvinSSSS/HubCalculadoras" target="_blank" rel="noreferrer">{{ isPt() ? 'VER CÓDIGO-FONTE' : 'VIEW SOURCE CODE' }} <span>↗</span></a>
+  </section>
   <main>
     <div class="intro">
       <div><p class="eyebrow">{{ isPt() ? 'FERRAMENTAS SEM ANÚNCIOS' : 'AD-FREE TOOLS' }}</p><h1>{{ isPt() ? 'Hub de' : 'Useful' }} <em>{{ isPt() ? 'Calculadoras' : 'Calculators' }}</em></h1><p class="lead">{{ isPt() ? 'Resultados instantâneos, gráficos claros e seus dados somente neste dispositivo.' : 'Instant results, clear charts and your data stays on this device.' }}</p></div>
