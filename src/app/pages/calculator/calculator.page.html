@@ -1,13 +1,13 @@
 <!--
   Acionador e drawer ficam fora do ion-content para não serem recortados pela
-  área rolável do Ionic. O painel apresenta o estudo de caso do projeto.
+  área rolável do Ionic. O painel apresenta a solução e suas decisões técnicas.
 -->
 <button class="project-menu-trigger" type="button" (click)="toggleProjectMenu()" [attr.aria-expanded]="projectMenuOpen()" aria-controls="project-menu">
   <span aria-hidden="true">＋</span><b>{{ isPt() ? 'SOBRE O PROJETO' : 'ABOUT THE PROJECT' }}</b>
 </button>
 @if (projectMenuOpen()) { <button class="drawer-backdrop" type="button" (click)="closeProjectMenu()" [attr.aria-label]="isPt() ? 'Fechar informações do projeto' : 'Close project information'"></button> }
 <section id="project-menu" class="project-drawer" [class.open]="projectMenuOpen()" [attr.aria-hidden]="!projectMenuOpen()" aria-labelledby="project-menu-title">
-    <div class="drawer-heading"><p>CASE STUDY / 01</p><button type="button" (click)="closeProjectMenu()" [attr.aria-label]="isPt() ? 'Fechar menu' : 'Close menu'">×</button></div>
+    <div class="drawer-heading"><p>{{ isPt() ? 'SOLUÇÃO / 01' : 'SOLUTION / 01' }}</p><button type="button" (click)="closeProjectMenu()" [attr.aria-label]="isPt() ? 'Fechar menu' : 'Close menu'">×</button></div>
     <h2 id="project-menu-title">{{ isPt() ? 'Por trás do' : 'Behind the' }} <em>{{ isPt() ? 'Hub.' : 'Hub.' }}</em></h2>
     <article>
       <span>01 / {{ isPt() ? 'O MOTIVO' : 'WHY' }}</span>
@@ -48,6 +48,8 @@
       <button [class.active]="activeTab() === 'travel'" (click)="select('travel')">{{ isPt() ? 'Deslocamento' : 'Commuting' }}</button>
       <button [class.active]="activeTab() === 'loan'" (click)="select('loan')">{{ isPt() ? 'Financiamento' : 'Loan' }}</button>
       <button [class.active]="activeTab() === 'discount'" (click)="select('discount')">{{ isPt() ? 'Descontos' : 'Discounts' }}</button>
+      <button [class.active]="activeTab() === 'barbecue'" (click)="select('barbecue')">{{ isPt() ? 'Churrasco' : 'Barbecue' }}</button>
+      <button [class.active]="activeTab() === 'currency'" (click)="select('currency')">{{ isPt() ? 'Moedas' : 'Currency' }}</button>
     </nav>
 
     <!-- Tela 1: composição do valor-hora base e aplicação da margem de segurança/lucro. -->
@@ -108,6 +110,45 @@
         </div>
         <!-- A variável CSS --saved controla a fatia verde do gráfico de rosca. -->
         <aside><span>{{ isPt() ? 'PREÇO FINAL' : 'FINAL PRICE' }}</span><strong>{{ money(discountedPrice()) }}</strong><div class="donut" [style.--saved]="percentWidth(savedAmount(), originalPrice) + '%'" role="img" [attr.aria-label]="(isPt() ? 'Economia de ' : 'Savings of ') + money(savedAmount())"><b>{{ percentWidth(savedAmount(), originalPrice).toFixed(1) }}%</b></div><p>{{ isPt() ? 'Economia:' : 'Savings:' }} {{ money(savedAmount()) }} · {{ installments }}x {{ money(installmentValue()) }}</p></aside>
+      </section>
+    }
+
+    <!-- Tela 6: lista de compras para churrasco ajustada por público, duração e perfil. -->
+    @if (activeTab() === 'barbecue') {
+      <section class="calculator barbecue-calculator">
+        <div class="fields barbecue-fields">
+          <div class="panel-title"><span aria-hidden="true">♟</span><h2>{{ isPt() ? 'Configurações do evento' : 'Event settings' }}</h2></div>
+          <label>{{ isPt() ? 'Número de pessoas' : 'Number of guests' }}<input type="number" min="0" [(ngModel)]="barbecuePeople"></label>
+          <label>{{ isPt() ? 'Crianças' : 'Children' }}<input type="number" min="0" [max]="barbecuePeople" [(ngModel)]="barbecueChildren"></label>
+          <label>{{ isPt() ? 'Duração do churrasco' : 'Barbecue duration' }}
+            <select [(ngModel)]="barbecueDuration"><option value="short">{{ isPt() ? 'Curto (até 3 horas)' : 'Short (up to 3 hours)' }}</option><option value="medium">{{ isPt() ? 'Médio (3–4 horas)' : 'Medium (3–4 hours)' }}</option><option value="long">{{ isPt() ? 'Longo (mais de 4 horas)' : 'Long (over 4 hours)' }}</option></select>
+          </label>
+          <label>{{ isPt() ? 'Perfil dos convidados' : 'Guest profile' }}
+            <select [(ngModel)]="barbecueProfile"><option value="light">{{ isPt() ? 'Consumo leve' : 'Light consumption' }}</option><option value="normal">{{ isPt() ? 'Consumo normal' : 'Normal consumption' }}</option><option value="high">{{ isPt() ? 'Consumo alto' : 'High consumption' }}</option></select>
+          </label>
+          <p class="calculation-note">{{ isPt() ? 'A lista é atualizada automaticamente. Crianças recebem uma estimativa reduzida e o perfil ajusta todas as quantidades.' : 'The list updates automatically. Children receive a reduced estimate and the profile adjusts all quantities.' }}</p>
+        </div>
+        <aside class="shopping-list">
+          <div class="panel-title"><span aria-hidden="true">♨</span><h2>{{ isPt() ? 'Lista de compras' : 'Shopping list' }}</h2></div>
+          <article class="shopping-group meat"><h3>🥩 {{ isPt() ? 'Carnes' : 'Meat' }} <strong>{{ barbecueResult().meat.toFixed(1) }} kg</strong></h3><p>{{ isPt() ? 'Picanha/Alcatra' : 'Beef' }}: <b>{{ barbecueResult().picanha.toFixed(1) }} kg</b><br>{{ isPt() ? 'Frango' : 'Chicken' }}: <b>{{ barbecueResult().chicken.toFixed(1) }} kg</b><br>{{ isPt() ? 'Linguiça' : 'Sausage' }}: <b>{{ barbecueResult().sausage.toFixed(1) }} kg</b></p></article>
+          <article class="shopping-group drinks"><h3>💧 {{ isPt() ? 'Bebidas' : 'Drinks' }}</h3><p>{{ isPt() ? 'Cerveja' : 'Beer' }}: <b>{{ barbecueResult().beer.toFixed(1) }} L</b><br>{{ isPt() ? 'Refrigerante' : 'Soda' }}: <b>{{ barbecueResult().soda.toFixed(1) }} L</b><br>{{ isPt() ? 'Água' : 'Water' }}: <b>{{ barbecueResult().water.toFixed(1) }} L</b></p></article>
+          <article class="shopping-group sides"><h3>🍞 {{ isPt() ? 'Acompanhamentos' : 'Side dishes' }}</h3><p>{{ isPt() ? 'Pão de alho' : 'Garlic bread' }}: <b>{{ barbecueResult().garlicBread }} {{ isPt() ? 'unid' : 'units' }}</b><br>{{ isPt() ? 'Farofa' : 'Farofa' }}: <b>{{ barbecueResult().farofa.toFixed(1) }} kg</b><br>{{ isPt() ? 'Salada' : 'Salad' }}: <b>{{ barbecueResult().salad.toFixed(1) }} kg</b></p></article>
+          <article class="shopping-group charcoal"><h3>🔥 {{ isPt() ? 'Carvão' : 'Charcoal' }} <strong>{{ barbecueResult().charcoal.toFixed(1) }} kg</strong></h3></article>
+        </aside>
+      </section>
+    }
+
+    <!-- Tela 7: conversão local com taxa digitada e moedas reversíveis. -->
+    @if (activeTab() === 'currency') {
+      <section class="calculator currency-calculator">
+        <div class="fields currency-fields">
+          <label>{{ isPt() ? 'Valor de origem' : 'Source amount' }}<input type="number" min="0" [(ngModel)]="currencyAmount"></label>
+          <label>{{ isPt() ? 'Moeda de origem' : 'Source currency' }}<select [(ngModel)]="sourceCurrency"><option>BRL</option><option>USD</option><option>EUR</option><option>GBP</option><option>JPY</option><option>ARS</option></select></label>
+          <button class="swap" type="button" (click)="swapCurrencies()" [attr.aria-label]="isPt() ? 'Inverter moedas' : 'Swap currencies'">⇄ {{ isPt() ? 'INVERTER' : 'SWAP' }}</button>
+          <label>{{ isPt() ? 'Moeda de destino' : 'Target currency' }}<select [(ngModel)]="targetCurrency"><option>BRL</option><option>USD</option><option>EUR</option><option>GBP</option><option>JPY</option><option>ARS</option></select></label>
+          <label>{{ isPt() ? 'Taxa de conversão' : 'Conversion rate' }}<input type="number" min="0" step="0.000001" [(ngModel)]="exchangeRate"><small>1 {{ sourceCurrency }} = {{ exchangeRate }} {{ targetCurrency }}</small></label>
+        </div>
+        <aside><span>{{ isPt() ? 'VALOR CONVERTIDO' : 'CONVERTED AMOUNT' }}</span><strong>{{ currency(convertedAmount(), targetCurrency) }}</strong><div class="currency-flow"><div><small>{{ sourceCurrency }}</small><b>{{ currency(currencyAmount, sourceCurrency) }}</b></div><i>→</i><div class="target"><small>{{ targetCurrency }}</small><b>{{ currency(convertedAmount(), targetCurrency) }}</b></div></div><p>{{ isPt() ? 'Informe a cotação usada pelo seu banco ou serviço. A aplicação não consulta nem transmite dados para APIs externas.' : 'Enter the rate used by your bank or service. The app does not query or transmit data to external APIs.' }}</p></aside>
       </section>
     }
     <p class="disclaimer">{{ isPt() ? 'Resultados são estimativas educacionais e não constituem aconselhamento financeiro.' : 'Results are educational estimates and do not constitute financial advice.' }}</p>

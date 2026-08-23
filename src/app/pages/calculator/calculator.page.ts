@@ -3,7 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { IonContent } from '@ionic/angular/standalone';
 import { LanguageService } from '../../core/language.service';
 
-type CalculatorTab = 'hourly' | 'interest' | 'travel' | 'loan' | 'discount';
+type CalculatorTab = 'hourly' | 'interest' | 'travel' | 'loan' | 'discount' | 'barbecue' | 'currency';
+type BarbecueDuration = 'short' | 'medium' | 'long';
+type GuestProfile = 'light' | 'normal' | 'high';
 type ExportRow = Record<string, string | number>;
 
 /**
@@ -31,6 +33,10 @@ export class CalculatorPage {
   loanAmount = 50000; loanAnnualRate = 18; loanMonths = 36;
   // Entradas da tela "Descontos".
   originalPrice = 1000; discountRate = 10; additionalDiscount = 5; installments = 10;
+  // Entradas da tela "Churrasco".
+  barbecuePeople = 10; barbecueChildren = 2; barbecueDuration: BarbecueDuration = 'medium'; barbecueProfile: GuestProfile = 'normal';
+  // Entradas do conversor. A taxa é manual para manter o app local e transparente.
+  currencyAmount = 1000; sourceCurrency = 'BRL'; targetCurrency = 'USD'; exchangeRate = 0.185;
 
   /*
    * Valor-hora: soma renda e custos, divide pelas horas faturáveis e ajusta a
@@ -65,18 +71,56 @@ export class CalculatorPage {
   readonly savedAmount = computed(() => this.positive(this.originalPrice) - this.discountedPrice());
   readonly installmentValue = computed(() => this.discountedPrice() / Math.max(Math.floor(this.installments), 1));
 
+  /*
+   * Churrasco: adultos e crianças possuem consumo-base diferente. Duração e
+   * perfil aplicam fatores sobre carnes, bebidas e acompanhamentos.
+   */
+  readonly barbecueResult = computed(() => {
+    const people = Math.max(Math.floor(this.barbecuePeople), 0);
+    const children = Math.min(Math.max(Math.floor(this.barbecueChildren), 0), people);
+    const adults = people - children;
+    const durationFactor = { short: .85, medium: 1, long: 1.2 }[this.barbecueDuration];
+    const profileFactor = { light: .8, normal: 1, high: 1.25 }[this.barbecueProfile];
+    const consumptionFactor = durationFactor * profileFactor;
+    const meat = (adults * .4 + children * .2) * consumptionFactor;
+    return {
+      people, adults, children, meat,
+      picanha: meat * .45, chicken: meat * .3, sausage: meat * .25,
+      beer: adults * 1.2 * consumptionFactor,
+      soda: (adults * .45 + children * .65) * durationFactor,
+      water: people * .5 * durationFactor,
+      garlicBread: Math.ceil(people * .5 * consumptionFactor),
+      farofa: people * .1 * consumptionFactor,
+      salad: people * .12 * durationFactor,
+      charcoal: Math.max(meat, people > 0 ? 2 : 0)
+    };
+  });
+
+  // Conversão direta: valor de origem multiplicado pela taxa informada.
+  readonly convertedAmount = computed(() => this.positive(this.currencyAmount) * this.positive(this.exchangeRate));
+
   /** Informa qual idioma deve ser usado pelos textos e formatos monetários. */
   isPt(): boolean { return this.language.current() === 'pt'; }
   /** Troca a calculadora exibida sem navegar ou recarregar a página. */
   select(tab: CalculatorTab): void { this.activeTab.set(tab); }
-  /** Abre ou fecha o estudo de caso lateral. */
+  /** Abre ou fecha a explicação da solução no painel lateral. */
   toggleProjectMenu(): void { this.projectMenuOpen.update(open => !open); }
-  /** Fecha explicitamente o estudo de caso lateral. */
+  /** Fecha explicitamente a explicação da solução. */
   closeProjectMenu(): void { this.projectMenuOpen.set(false); }
   /** Permite fechar o drawer pela tecla Escape, além do botão e do backdrop. */
   @HostListener('document:keydown.escape') onEscape(): void { this.closeProjectMenu(); }
   /** Formata valores sempre em reais, respeitando a pontuação do idioma atual. */
   money(value: number): string { return new Intl.NumberFormat(this.isPt() ? 'pt-BR' : 'en-US', { style: 'currency', currency: 'BRL' }).format(value); }
+  /** Formata valores usando a moeda selecionada pelo usuário. */
+  currency(value: number, code: string): string {
+    try { return new Intl.NumberFormat(this.isPt() ? 'pt-BR' : 'en-US', { style: 'currency', currency: code }).format(value); }
+    catch { return `${code} ${value.toFixed(2)}`; }
+  }
+  /** Inverte as moedas e transforma a taxa na sua recíproca. */
+  swapCurrencies(): void {
+    [this.sourceCurrency, this.targetCurrency] = [this.targetCurrency, this.sourceCurrency];
+    this.exchangeRate = this.exchangeRate > 0 ? 1 / this.exchangeRate : 0;
+  }
   /** Converte uma proporção para a faixa visual segura de 0% a 100%. */
   percentWidth(value: number, maximum: number): number { return maximum > 0 ? Math.min(Math.max(value / maximum * 100, 0), 100) : 0; }
   /** Produz a polyline SVG do crescimento do investimento. */
@@ -165,6 +209,28 @@ export class CalculatorPage {
         { [pt ? 'Descrição' : 'Description']: pt ? 'Preço final' : 'Final price', [pt ? 'Valor' : 'Value']: this.discountedPrice() },
         { [pt ? 'Descrição' : 'Description']: `${Math.max(Math.floor(this.installments), 1)}x`, [pt ? 'Valor' : 'Value']: this.installmentValue() }
       ] };
+      case 'barbecue': {
+        const result = this.barbecueResult();
+        return { name: pt ? 'Churrasco' : 'Barbecue', rows: [
+          { [pt ? 'Categoria' : 'Category']: pt ? 'Picanha/Alcatra' : 'Beef', [pt ? 'Quantidade' : 'Quantity']: result.picanha, [pt ? 'Unidade' : 'Unit']: 'kg' },
+          { [pt ? 'Categoria' : 'Category']: pt ? 'Frango' : 'Chicken', [pt ? 'Quantidade' : 'Quantity']: result.chicken, [pt ? 'Unidade' : 'Unit']: 'kg' },
+          { [pt ? 'Categoria' : 'Category']: pt ? 'Linguiça' : 'Sausage', [pt ? 'Quantidade' : 'Quantity']: result.sausage, [pt ? 'Unidade' : 'Unit']: 'kg' },
+          { [pt ? 'Categoria' : 'Category']: pt ? 'Cerveja' : 'Beer', [pt ? 'Quantidade' : 'Quantity']: result.beer, [pt ? 'Unidade' : 'Unit']: 'L' },
+          { [pt ? 'Categoria' : 'Category']: pt ? 'Refrigerante' : 'Soda', [pt ? 'Quantidade' : 'Quantity']: result.soda, [pt ? 'Unidade' : 'Unit']: 'L' },
+          { [pt ? 'Categoria' : 'Category']: pt ? 'Água' : 'Water', [pt ? 'Quantidade' : 'Quantity']: result.water, [pt ? 'Unidade' : 'Unit']: 'L' },
+          { [pt ? 'Categoria' : 'Category']: pt ? 'Pão de alho' : 'Garlic bread', [pt ? 'Quantidade' : 'Quantity']: result.garlicBread, [pt ? 'Unidade' : 'Unit']: pt ? 'unid' : 'units' },
+          { [pt ? 'Categoria' : 'Category']: pt ? 'Farofa' : 'Farofa', [pt ? 'Quantidade' : 'Quantity']: result.farofa, [pt ? 'Unidade' : 'Unit']: 'kg' },
+          { [pt ? 'Categoria' : 'Category']: pt ? 'Salada' : 'Salad', [pt ? 'Quantidade' : 'Quantity']: result.salad, [pt ? 'Unidade' : 'Unit']: 'kg' },
+          { [pt ? 'Categoria' : 'Category']: pt ? 'Carvão' : 'Charcoal', [pt ? 'Quantidade' : 'Quantity']: result.charcoal, [pt ? 'Unidade' : 'Unit']: 'kg' }
+        ] };
+      }
+      case 'currency': return { name: pt ? 'Moedas' : 'Currency', rows: [{
+        [pt ? 'Moeda de origem' : 'Source currency']: this.sourceCurrency,
+        [pt ? 'Valor de origem' : 'Source amount']: this.currencyAmount,
+        [pt ? 'Moeda de destino' : 'Target currency']: this.targetCurrency,
+        [pt ? 'Taxa informada' : 'Entered rate']: this.exchangeRate,
+        [pt ? 'Valor convertido' : 'Converted amount']: this.convertedAmount()
+      }] };
     }
   }
 

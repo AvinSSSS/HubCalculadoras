@@ -9,7 +9,7 @@ button { cursor: pointer; }
 header button { padding: 8px 11px; color: var(--lime); border: 1px solid var(--line); background: none; font: 700 .75rem monospace; }
 
 /*
- * Drawer do estudo de caso. O acionador usa position: fixed e fica fora do
+ * Drawer da solução. O acionador usa position: fixed e fica fora do
  * ion-content; backdrop e painel recebem camadas superiores por z-index.
  */
 .project-menu-trigger { position: fixed; z-index: 20; top: 50%; right: 0; display: flex; align-items: center; gap: 10px; padding: 13px 15px; color: #0c0e0c; border: 0; background: var(--lime); transform: translateY(-50%); writing-mode: vertical-rl; box-shadow: 0 12px 35px #0008; }
@@ -60,8 +60,8 @@ nav button.active { color: #0c0e0c; border-color: var(--lime); background: var(-
 .fields.compact { gap: 14px 20px; }
 .fields.loan-fields label:last-child { grid-column: 1 / -1; }
 label { display: grid; gap: 9px; color: #c6cac1; font-size: .78rem; }
-input { width: 100%; padding: 13px; border: 1px solid #363b34; border-radius: 0; outline: none; color: var(--ink); background: #0c0e0c; font: 1rem monospace; }
-input:focus { border-color: var(--lime); }
+input, select { width: 100%; padding: 13px; border: 1px solid #363b34; border-radius: 0; outline: none; color: var(--ink); background: #0c0e0c; font: 1rem monospace; }
+input:focus, select:focus { border-color: var(--lime); }
 aside { min-width: 0; padding: 34px; display: flex; flex-direction: column; justify-content: center; border-left: 1px solid var(--line); background: #111310; }
 aside > span { color: var(--lime); font: .7rem monospace; letter-spacing: .1em; }
 aside > strong { display: block; margin: 17px 0; font: 400 clamp(2rem, 4vw, 3.5rem)/1 Georgia, serif; }
@@ -92,6 +92,39 @@ aside > p { color: var(--muted); line-height: 1.6; }
 .donut { --saved: 0%; width: 132px; aspect-ratio: 1; margin: 6px auto 14px; display: grid; place-items: center; border-radius: 50%; background: conic-gradient(var(--lime) var(--saved), #292d27 0); position: relative; }
 .donut::after { content: ''; position: absolute; inset: 18px; border-radius: 50%; background: #111310; }
 .donut b { z-index: 1; font: 700 1rem monospace; }
+
+/* Calculadora de churrasco: formulário e lista de compras inspirados em dois cartões. */
+.barbecue-calculator { grid-template-columns: .85fr 1.15fr; min-height: 590px; }
+.barbecue-fields { grid-template-columns: 1fr; align-content: start; }
+.panel-title { display: flex; align-items: center; gap: 10px; grid-column: 1 / -1; }
+.panel-title span { color: var(--lime); }
+.panel-title h2 { margin: 0; font: 400 1.15rem Georgia, serif; }
+.calculation-note { margin: 2px 0 0; padding: 15px; color: var(--muted); border-left: 2px solid var(--lime); background: #111310; font-size: .76rem; line-height: 1.6; }
+.shopping-list { justify-content: flex-start; gap: 12px; }
+.shopping-group { padding: 14px 16px; border: 1px solid var(--line); }
+.shopping-group h3 { display: flex; justify-content: space-between; gap: 16px; margin: 0 0 9px; font-size: .86rem; }
+.shopping-group h3 strong { color: var(--ink); font: 700 .8rem monospace; }
+.shopping-group p { margin: 0; color: var(--muted); font-size: .75rem; line-height: 1.55; }
+.shopping-group p b { float: right; color: var(--ink); font-weight: 600; }
+.shopping-group.meat { border-color: #5b302c; background: #241715; }
+.shopping-group.drinks { border-color: #28455d; background: #121d25; }
+.shopping-group.sides { border-color: #594727; background: #211c13; }
+.shopping-group.charcoal { background: #171917; }
+.shopping-group.charcoal h3 { margin: 0; }
+
+/* Conversor: mantém a taxa explícita e representa o fluxo entre as duas moedas. */
+.currency-fields { position: relative; }
+.currency-fields label:last-child { grid-column: 1 / -1; }
+.currency-fields label small { color: var(--muted); font: .68rem monospace; }
+.swap { align-self: end; padding: 13px; color: var(--lime); border: 1px solid var(--line); background: transparent; font: 700 .7rem monospace; }
+.swap:hover { border-color: var(--lime); }
+.currency-flow { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 13px; margin: 18px 0; }
+.currency-flow div { min-width: 0; padding: 15px; border: 1px solid var(--line); }
+.currency-flow div.target { border-color: #526a2c; background: #172013; }
+.currency-flow small, .currency-flow b { display: block; }
+.currency-flow small { margin-bottom: 7px; color: var(--muted); font: .65rem monospace; }
+.currency-flow b { overflow: hidden; text-overflow: ellipsis; font-size: .78rem; }
+.currency-flow i { color: var(--lime); font-style: normal; }
 .disclaimer { color: #696e65; font-size: .72rem; text-align: center; margin-top: 22px; }
 
 /* Em telas estreitas, formulário e resultado ficam empilhados e o drawer vira um botão inferior. */
@@ -101,6 +134,8 @@ aside > p { color: var(--muted); line-height: 1.6; }
   .calculator { grid-template-columns: 1fr; }
   .fields { grid-template-columns: 1fr; padding: 24px; }
   .fields.loan-fields label:last-child { grid-column: auto; }
+  .barbecue-calculator { grid-template-columns: 1fr; }
+  .currency-fields label:last-child { grid-column: auto; }
   aside { border-left: 0; border-top: 1px solid var(--line); }
   .project-menu-trigger { top: auto; right: 14px; bottom: 14px; transform: none; writing-mode: horizontal-tb; }
   .project-drawer { padding: 22px 24px 36px; }

@@ -43,6 +43,29 @@ describe('CalculatorPage', () => {
     expect(component.installmentValue()).toBe(270);
   });
 
+  it('should prepare a barbecue shopping list for adults and children', () => {
+    component.barbecuePeople = 10;
+    component.barbecueChildren = 2;
+    component.barbecueDuration = 'medium';
+    component.barbecueProfile = 'normal';
+    const result = component.barbecueResult();
+    expect(result.adults).toBe(8);
+    expect(result.meat).toBeCloseTo(3.6, 2);
+    expect(result.picanha + result.chicken + result.sausage).toBeCloseTo(result.meat, 5);
+  });
+
+  it('should convert and swap currencies using the entered rate', () => {
+    component.currencyAmount = 100;
+    component.sourceCurrency = 'BRL';
+    component.targetCurrency = 'USD';
+    component.exchangeRate = .2;
+    expect(component.convertedAmount()).toBe(20);
+    component.swapCurrencies();
+    expect(component.sourceCurrency).toBe('USD');
+    expect(component.targetCurrency).toBe('BRL');
+    expect(component.exchangeRate).toBe(5);
+  });
+
   it('should open and close the project information menu', () => {
     component.toggleProjectMenu();
     expect(component.projectMenuOpen()).toBeTrue();

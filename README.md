@@ -14,6 +14,8 @@ Web app responsivo e sem anúncios para resolver cálculos recorrentes com rapid
 - 🚗 **Deslocamento:** compara o custo mensal de veículo a combustão e elétrico.
 - 🏦 **Financiamento:** estima parcela fixa, juros totais e evolução do saldo devedor.
 - 🏷️ **Descontos:** combina descontos sucessivos e calcula o parcelamento do preço final.
+- 🔥 **Churrasco:** gera uma lista de carnes, bebidas, acompanhamentos e carvão conforme convidados, duração e perfil de consumo.
+- 💱 **Conversor de moedas:** converte valores com uma taxa informada pelo usuário, sem consultar APIs externas.
 
 Cada calculadora inclui um gráfico responsivo e pode exportar seus resultados para um arquivo Excel (`.xlsx`).
 
