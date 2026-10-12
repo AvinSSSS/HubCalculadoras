@@ -54,7 +54,10 @@ export class CalculatorPage {
     const rows = this.interestRows();
     return rows[rows.length - 1]?.balance ?? this.positive(this.initialAmount);
   });
-  readonly investedAmount = computed(() => { this.formRevision(); return this.positive(this.initialAmount + this.monthlyDeposit * Math.max(Math.floor(this.months), 0)); });
+  readonly investedAmount = computed(() => {
+    const rows = this.interestRows();
+    return rows[rows.length - 1].invested;
+  });
 
   // Deslocamento: distância mensal dividida pela eficiência e multiplicada pelo preço da fonte de energia.
   readonly fuelMonthly = computed(() => { this.formRevision(); return this.positive((this.distance * this.workDays / Math.max(this.fuelEfficiency, .1)) * this.fuelPrice); });
@@ -164,7 +167,7 @@ export class CalculatorPage {
    * acrescentado ao final. O limite de 1.200 meses protege a interface.
    */
   private buildInterestRows(): { month: number; invested: number; earnings: number; balance: number }[] {
-    const periods = Math.min(Math.max(Math.floor(this.months), 0), 1200);
+    const periods = Math.min(Math.floor(this.positive(this.months)), 1200);
     const rate = this.positive(this.monthlyRate) / 100;
     const deposit = this.positive(this.monthlyDeposit);
     let balance = this.positive(this.initialAmount);
