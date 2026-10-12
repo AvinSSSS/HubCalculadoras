@@ -60,6 +60,7 @@ npx ng build --configuration production --base-href /HubCalculadoras/
 - Entradas negativas e divisões por zero são neutralizadas.
 - A margem do valor-hora é limitada a 95%.
 - Juros compostos utilizam capitalização mensal e aportes no fim de cada período.
+- O prazo dos juros compostos é arredondado para baixo e limitado a 1.200 meses; valores negativos, vazios ou não finitos equivalem a zero meses. Resumo, gráfico e exportação usam o mesmo prazo.
 - O comparativo de deslocamento usa distância diária multiplicada pelos dias informados.
 
 > ⚠️ Os resultados são estimativas educacionais, não aconselhamento financeiro.
