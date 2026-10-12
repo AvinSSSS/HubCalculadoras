@@ -43,7 +43,7 @@ Todos os cálculos acontecem localmente. Nenhum valor digitado é transmitido ou
 
 ## 🚀 Executar e validar
 
-Requisitos: Node.js 22+ e npm 11+.
+Execute os comandos na raiz do repositório, onde ficam [package.json](package.json), [package-lock.json](package-lock.json) e [angular.json](angular.json). Use Node.js 22.12+ na linha 22 e npm; o Angular CLI fixado no lockfile aceita npm 8+ e não exige npm 11. Chrome instalado é necessário para os testes Karma.
 
 ```bash
 npm ci
@@ -54,6 +54,28 @@ npm start
 npx ng test --watch=false --browsers=ChromeHeadless
 npx ng build --configuration production --base-href /HubCalculadoras/
 ```
+
+`npm start` usa a configuração de desenvolvimento. O build acima gera os arquivos em `www/`; a configuração de produção substitui [environment.ts](src/environments/environment.ts) por [environment.prod.ts](src/environments/environment.prod.ts). Esses arquivos contêm apenas a propriedade `production`; não há arquivo `.env` a preencher para executar o app web.
+
+Se o Karma não localizar o Chrome no Windows, informe `CHROME_BIN` com o caminho do executável instalado antes de executar os testes. Exemplo em PowerShell, ajustando o caminho conforme a instalação:
+
+```powershell
+$env:CHROME_BIN = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+npm.cmd test -- --watch=false --browsers=ChromeHeadless
+```
+
+### Módulos e validação local
+
+- [CalculatorPage](src/app/pages/calculator/calculator.page.ts) concentra entradas, fórmulas, séries dos gráficos e exportação XLSX; HTML e SCSS ficam no mesmo diretório. `onFormChange()` invalida os resultados reativos quando as entradas mudam.
+- [LanguageService](src/app/core/language.service.ts) controla PT/EN, o atributo `lang` do documento e a preferência de idioma.
+- [Rotas](src/app/app.routes.ts) carregam a página de calculadoras; [main.ts](src/main.ts) configura Angular, Ionic e o roteador.
+- [karma.conf.js](karma.conf.js) configura Jasmine/Chrome; [src/test.ts](src/test.ts) inicializa o ambiente Angular de testes.
+
+Os dois arquivos de testes possuem oito casos: criação do app e da página, série de juros compostos, financiamento, descontos sucessivos, churrasco, conversão/inversão de moedas e abertura/fechamento do menu. Os dados sintéticos são definidos em [calculator.page.spec.ts](src/app/pages/calculator/calculator.page.spec.ts) e [app.component.spec.ts](src/app/app.component.spec.ts); não é necessário importar uma base ou preparar contas. Por exemplo, o teste de descontos usa preço 1.000, dois descontos de 10% e três parcelas, verificando preço final 810 e parcela 270.
+
+Essa suíte não verifica download/conteúdo do XLSX, gráficos, foco do teclado ou todas as entradas-limite das fórmulas. Para uma conferência manual com dados sintéticos, use o mesmo exemplo de descontos, alterne PT/EN e exporte a aba ativa para conferir a planilha. Build e testes web não validam projetos nativos Capacitor ou SDKs Android/iOS.
+
+`npm run lint` executa `ng lint`, configurado em `angular.json`, com as regras de [.eslintrc.json](.eslintrc.json). Nas verificações locais de 12/10/2026, instalação offline, oito testes Karma, lint e build passaram com Node.js 22.17.1 e npm 10.9.2. A instalação usou o cache npm desta máquina; isso não comprova instalação com cache vazio.
 
 ## 🧠 Regras de cálculo
 
