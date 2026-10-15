@@ -1,4 +1,4 @@
-import { Component, computed, HostListener, inject, signal } from '@angular/core';
+import { Component, computed, ElementRef, HostListener, inject, OnDestroy, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonContent } from '@ionic/angular/standalone';
 import { LanguageService } from '../../core/language.service';
@@ -16,12 +16,15 @@ type ExportRow = Record<string, string | number>;
  * Nenhum dado é enviado a servidor: todas as operações acontecem no navegador.
  */
 @Component({ selector: 'app-calculator', templateUrl: './calculator.page.html', styleUrls: ['./calculator.page.scss'], standalone: true, imports: [IonContent, FormsModule] })
-export class CalculatorPage {
+export class CalculatorPage implements OnDestroy {
   // Serviços e estado geral da interface.
   readonly language = inject(LanguageService);
   readonly activeTab = signal<CalculatorTab>('hourly');
   readonly exporting = signal(false);
   readonly projectMenuOpen = signal(false);
+  private readonly projectDialog = viewChild.required<ElementRef<HTMLDialogElement>>('projectDialog');
+  private readonly projectTrigger = viewChild.required<ElementRef<HTMLButtonElement>>('projectTrigger');
+  private readonly projectClose = viewChild.required<ElementRef<HTMLButtonElement>>('projectClose');
   // Versão reativa incrementada sempre que um input/select do formulário muda.
   private readonly formRevision = signal(0);
 
@@ -110,11 +113,37 @@ export class CalculatorPage {
   /** Troca a calculadora exibida sem navegar ou recarregar a página. */
   select(tab: CalculatorTab): void { this.activeTab.set(tab); }
   /** Abre ou fecha a explicação da solução no painel lateral. */
-  toggleProjectMenu(): void { this.projectMenuOpen.update(open => !open); }
+  toggleProjectMenu(): void {
+    if (this.projectMenuOpen()) { this.closeProjectMenu(); return; }
+    this.projectDialog().nativeElement.showModal();
+    this.projectMenuOpen.set(true);
+    this.projectClose().nativeElement.focus();
+  }
   /** Fecha explicitamente a explicação da solução. */
-  closeProjectMenu(): void { this.projectMenuOpen.set(false); }
+  closeProjectMenu(): void {
+    if (!this.projectMenuOpen()) { return; }
+    this.projectDialog().nativeElement.close();
+    this.projectMenuOpen.set(false);
+    this.projectTrigger().nativeElement.focus();
+  }
   /** Permite fechar o drawer pela tecla Escape, além do botão e do backdrop. */
-  @HostListener('document:keydown.escape') onEscape(): void { this.closeProjectMenu(); }
+  onEscape(event?: Event): void {
+    event?.preventDefault();
+    this.closeProjectMenu();
+  }
+  /** Mantém Tab nos controles do painel, inclusive nos limites do diálogo nativo. */
+  onProjectTab(event: KeyboardEvent): void {
+    if (event.key !== 'Tab') { return; }
+    const controls = this.projectDialog().nativeElement.querySelectorAll<HTMLElement>('.project-drawer button, .project-drawer a[href]');
+    const first = controls[0];
+    const last = controls[controls.length - 1];
+    const backwards = event.shiftKey;
+    if (event.target === (backwards ? first : last)) {
+      event.preventDefault();
+      (backwards ? last : first)?.focus();
+    }
+  }
+  ngOnDestroy(): void { this.projectDialog().nativeElement.close(); }
   /** Invalida os resultados em cache quando qualquer campo do formulário muda. */
   @HostListener('input')
   @HostListener('change')

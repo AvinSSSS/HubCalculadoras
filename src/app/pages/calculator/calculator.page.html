@@ -2,12 +2,13 @@
   Acionador e drawer ficam fora do ion-content para não serem recortados pela
   área rolável do Ionic. O painel apresenta a solução e suas decisões técnicas.
 -->
-<button class="project-menu-trigger" type="button" (click)="toggleProjectMenu()" [attr.aria-expanded]="projectMenuOpen()" aria-controls="project-menu">
+<button #projectTrigger class="project-menu-trigger" type="button" (click)="toggleProjectMenu()" [attr.aria-expanded]="projectMenuOpen()" aria-controls="project-menu" aria-haspopup="dialog">
   <span aria-hidden="true">＋</span><b>{{ isPt() ? 'SOBRE O PROJETO' : 'ABOUT THE PROJECT' }}</b>
 </button>
-@if (projectMenuOpen()) { <button class="drawer-backdrop" type="button" (click)="closeProjectMenu()" [attr.aria-label]="isPt() ? 'Fechar informações do projeto' : 'Close project information'"></button> }
-<section id="project-menu" class="project-drawer" [class.open]="projectMenuOpen()" [attr.aria-hidden]="!projectMenuOpen()" aria-labelledby="project-menu-title">
-    <div class="drawer-heading"><p>{{ isPt() ? 'SOLUÇÃO / 01' : 'SOLUTION / 01' }}</p><button type="button" (click)="closeProjectMenu()" [attr.aria-label]="isPt() ? 'Fechar menu' : 'Close menu'">×</button></div>
+<dialog #projectDialog id="project-menu" class="project-dialog" aria-labelledby="project-menu-title" (cancel)="onEscape($event)" (keydown)="onProjectTab($event)">
+  <button class="drawer-backdrop" type="button" tabindex="-1" (click)="closeProjectMenu()" [attr.aria-label]="isPt() ? 'Fechar informações do projeto' : 'Close project information'"></button>
+  <section class="project-drawer" aria-labelledby="project-menu-title">
+    <div class="drawer-heading"><p>{{ isPt() ? 'SOLUÇÃO / 01' : 'SOLUTION / 01' }}</p><button #projectClose type="button" (click)="closeProjectMenu()" [attr.aria-label]="isPt() ? 'Fechar menu' : 'Close menu'">×</button></div>
     <h2 id="project-menu-title">{{ isPt() ? 'Por trás do' : 'Behind the' }} <em>{{ isPt() ? 'Hub.' : 'Hub.' }}</em></h2>
     <article>
       <span>01 / {{ isPt() ? 'O MOTIVO' : 'WHY' }}</span>
@@ -30,6 +31,7 @@
     </article>
     <a class="drawer-link" href="https://github.com/AvinSSSS/HubCalculadoras" target="_blank" rel="noreferrer">{{ isPt() ? 'VER CÓDIGO-FONTE' : 'VIEW SOURCE CODE' }} <span>↗</span></a>
   </section>
+</dialog>
 
 <!-- Área rolável principal da aplicação. -->
 <ion-content>
