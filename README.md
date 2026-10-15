@@ -32,6 +32,10 @@ Perfil e duração movimentam o consumo dentro dessas faixas. Os resultados são
 
 Todos os cálculos acontecem localmente. Nenhum valor digitado é transmitido ou armazenado.
 
+## Acesso por teclado ao painel do projeto
+
+O botão “Sobre o projeto” abre um diálogo modal e move o foco para “Fechar menu”. Tab e Shift+Tab percorrem os controles do painel enquanto a calculadora fica inativa. Escape, o botão de fechar e o fundo escurecido fecham o painel e devolvem o foco ao botão de abertura. Com o painel fechado, seus controles ficam fora da navegação por teclado.
+
 ## 🛠️ Tecnologias
 
 - Ionic 8 e Angular 20 com componentes standalone.

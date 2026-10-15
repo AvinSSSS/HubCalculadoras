@@ -15,9 +15,11 @@ header button { padding: 8px 11px; color: var(--lime); border: 1px solid var(--l
 .project-menu-trigger { position: fixed; z-index: 20; top: 50%; right: 0; display: flex; align-items: center; gap: 10px; padding: 13px 15px; color: #0c0e0c; border: 0; background: var(--lime); transform: translateY(-50%); writing-mode: vertical-rl; box-shadow: 0 12px 35px #0008; }
 .project-menu-trigger span { font: 400 1.2rem/1 sans-serif; }
 .project-menu-trigger b { font: 700 .65rem/1 monospace; letter-spacing: .11em; }
+.project-dialog { position: fixed; inset: 0; width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; padding: 0; border: 0; background: transparent; }
+.project-dialog::backdrop { background: transparent; }
 .drawer-backdrop { position: fixed; z-index: 30; inset: 0; border: 0; background: #050605b8; cursor: default; }
-.project-drawer { position: fixed; z-index: 40; top: 0; right: 0; width: min(480px, 100vw); height: 100%; padding: 28px 34px 42px; overflow-y: auto; color: var(--ink); border-left: 1px solid #526a2c; background: #111310; box-shadow: -20px 0 70px #000a; transform: translateX(105%); transition: transform .28s ease; visibility: hidden; }
-.project-drawer.open { transform: translateX(0); visibility: visible; }
+.project-drawer { position: fixed; z-index: 40; top: 0; right: 0; width: min(480px, 100vw); height: 100%; padding: 28px 34px 42px; overflow-y: auto; color: var(--ink); border-left: 1px solid #526a2c; background: #111310; box-shadow: -20px 0 70px #000a; animation: drawer-enter .28s ease; }
+@keyframes drawer-enter { from { transform: translateX(105%); } to { transform: translateX(0); } }
 .drawer-heading { display: flex; align-items: center; justify-content: space-between; }
 .drawer-heading p, .project-drawer article > span { color: var(--lime); font: 700 .66rem monospace; letter-spacing: .13em; }
 .drawer-heading button { width: 38px; height: 38px; color: var(--ink); border: 1px solid var(--line); background: transparent; font-size: 1.5rem; line-height: 1; }
@@ -143,4 +145,4 @@ aside > p { color: var(--muted); line-height: 1.6; }
   .project-drawer { padding: 22px 24px 36px; }
 }
 /* Remove a animação do painel quando o usuário prefere movimento reduzido. */
-@media (prefers-reduced-motion: reduce) { .project-drawer { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .project-drawer { animation: none; } }
